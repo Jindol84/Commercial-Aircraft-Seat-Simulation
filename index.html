@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>민항기 객실·동체 사이징 시뮬레이터</title>
 <script>
-(function () { var m = 'auto'; try { m = localStorage.getItem('cabinSimTheme') || 'auto'; } catch (e) {}
-  var d = m === 'auto' ? (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : m;
-  document.documentElement.setAttribute('data-theme', d === 'light' ? 'light' : 'dark'); })();
+(function () { var m = null; try { m = localStorage.getItem('cabinSimTheme'); } catch (e) {}
+  var d = (m === 'light' || m === 'dark') ? m : (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+  document.documentElement.setAttribute('data-theme', d); })();
 </script>
 <style>
 :root{
@@ -43,7 +43,28 @@ h1{font-size:17px;margin:0 0 2px;letter-spacing:-.2px}
 .seg{display:flex;background:var(--p3);border:1px solid var(--line);border-radius:8px;padding:3px;gap:3px}
 .seg button{flex:1;border:0;background:transparent;padding:7px 6px;border-radius:6px;cursor:pointer;color:var(--mut);font-weight:600}
 .seg button.on{background:var(--acc);color:var(--on-acc)}
-.seg.mini{padding:2px;gap:2px;margin:0 0 10px}.seg.mini button{padding:3px 4px;font-size:12px}
+.themebtn{position:fixed;top:10px;right:10px;z-index:20;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--glass2);color:var(--txt);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;backdrop-filter:blur(4px);box-shadow:0 2px 8px #0003}
+.themebtn:hover{border-color:var(--acc);color:var(--acc)}
+.themebtn svg{width:18px;height:18px}
+:root[data-theme=dark] .i-moon,:root[data-theme=light] .i-sun{display:none}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+fieldset:disabled{opacity:.62}
+fieldset:disabled input,fieldset:disabled select,fieldset:disabled button{cursor:not-allowed}
+.lockmsg{display:none;margin:10px 0 0;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--p3);font-size:12px;color:var(--txt)}
+.lockmsg.on{display:block}
+.cbox{display:none}
+.cbox.on{display:block}
+.crow{display:flex;gap:6px;margin:8px 0 0;align-items:center}
+.crow input[type=text]{flex:1;min-width:0;background:var(--p3);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-weight:600}
+.crow input[type=text]:focus{outline:1px solid var(--acc);border-color:var(--acc)}
+.crow .btn{padding:6px 10px;white-space:nowrap}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:disabled:hover{border-color:var(--line)}
+.btn.primary:disabled:hover{border-color:var(--acc)}
+.dirtytxt{color:var(--warn)!important;font-weight:600}
+.btn.danger:hover{border-color:var(--bad);color:var(--bad)}
+.btn.armed{border-color:var(--bad);color:var(--bad)}
 .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .pill{border:1px solid var(--line);background:var(--p3);border-radius:999px;padding:5px 11px;cursor:pointer;font-weight:600;font-variant-numeric:tabular-nums}
 .pill small{display:block;font-weight:400;font-size:10px;color:var(--mut);line-height:1.1}
@@ -118,22 +139,34 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
 </style>
 </head>
 <body>
+<button class="themebtn" id="themeBtn" type="button" aria-label="라이트/다크 전환" title="라이트/다크 전환"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
 <div class="app">
 <aside>
   <h1>객실·동체 사이징 시뮬레이터</h1>
   <p class="sub">완전 오프라인 · 단일 파일 · 개념설계용 (규정 검사는 근사 지표)</p>
-  <div class="seg mini" id="themeSeg" title="화면 테마: 자동은 OS·브라우저 설정을 따릅니다">
-    <button data-v="auto">자동</button><button data-v="light">라이트</button><button data-v="dark">다크</button>
-  </div>
-
   <div class="sec"><h2>기종 프리셋 (제작사 · 기종)</h2>
     <div class="row2">
-      <label><span class="fld">제작사</span><select id="makerSel" title="제작사"></select></label>
-      <label><span class="fld">기종</span><select id="modelSel" title="기종 — 선택하면 공식 전장·외경과 보정값을 불러옵니다"></select></label>
+      <label><span class="fld">제작사</span><select id="makerSel" title="제작사 — 커스텀에서는 모든 값을 조정할 수 있습니다"></select></label>
+      <label><span class="fld">기종</span><select id="modelSel" title="기종 — 공식 프리셋은 조회 전용, 커스텀은 조정 가능"></select></label>
     </div>
-    <p class="small" id="presetInfo" style="margin:0"></p>
+    <div class="cbox" id="customBox">
+      <div class="crow">
+        <input type="text" id="customName" maxlength="30" title="커스텀 기종 이름 (수정하면 바로 반영)" aria-label="커스텀 기종 이름">
+        <button class="btn danger" id="customDel" type="button" title="이 커스텀 기종을 삭제합니다">삭제</button>
+      </div>
+      <div class="crow">
+        <span class="small" id="saveState" style="flex:1"></span>
+        <button class="btn" id="customRevert" type="button" title="마지막으로 저장한 상태로 되돌립니다">변경 취소</button>
+        <button class="btn primary" id="customSave" type="button" title="현재 상태를 이 커스텀 기종에 저장합니다">저장</button>
+      </div>
+    </div>
+    <button class="btn" id="customBtn" type="button" style="width:100%;margin:8px 0 0" title="현재 기종(프리셋·작업 설정·커스텀)의 값을 복사해 새 커스텀 기종으로 만듭니다">＋ 커스텀 (복사해서 새 기종 만들기)</button>
+    <p class="small" id="presetInfo" style="margin:8px 0 0"></p>
+    <div class="lockmsg" id="lockMsg">🔒 공식 프리셋은 스펙에 맞춰져 있어 조회 전용입니다. 값을 바꾸려면 <b>＋ 커스텀</b>으로 복사하거나, 조정하던 상태로 돌아가세요.
+      <button class="btn" id="backBtn" type="button" style="width:100%;margin-top:7px"></button></div>
   </div>
 
+  <fieldset id="lockable">
   <div class="sec"><h2>동체 형식 · 좌석 배열</h2>
     <select id="layoutSel" title="동체 형식과 좌석 배열 — 항목의 외경은 그 배열에 필요한 최소 외경입니다"></select>
     <label class="chk" id="autoRow" style="margin-top:10px"><input type="checkbox" id="autoLayout"> 외경을 바꾸면 들어가는 최대 배열 자동 선택</label>
@@ -157,6 +190,7 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
   </details>
 
   <div class="sec"><button class="btn" id="resetAll" style="width:100%">모든 설정 초기화</button></div>
+  </fieldset>
 </aside>
 
 <main>
@@ -193,7 +227,8 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
   <section class="card notes">
     <details><summary>가정·한계·출처 (반드시 확인)</summary>
       <ul>
-        <li><b>화면</b>: 상단 “자동 · 라이트 · 다크”로 테마를 바꿉니다(자동은 OS·브라우저 설정을 따르고, 선택은 이 브라우저에 저장). 라이트 모드의 글자는 모두 어두운 색이며 LOPA·단면 캔버스 색도 모드에 따라 바뀝니다. 기종은 “제작사 → 기종” 드롭다운(계열별 묶음)으로 고르고, 동체 형식과 좌석 배열은 한 드롭다운(협동체/광동체 묶음, 항목마다 열 수·필요 외경)으로 고릅니다. Boeing 항목은 자리만 있으며 기종이 없어 “---”로 표시됩니다.</li>
+        <li><b>화면</b>: 화면 오른쪽 위 해/달 아이콘으로 라이트·다크를 바꿉니다(처음에는 OS·브라우저 설정을 따르고, 한 번 바꾸면 이 브라우저에 저장). 라이트 모드의 글자는 모두 어두운 색이며 LOPA·단면 캔버스 색도 모드에 따라 바뀝니다. 기종은 “제작사 → 기종” 드롭다운(계열별 묶음)으로 고르고, 동체 형식과 좌석 배열은 한 드롭다운(협동체/광동체 묶음, 항목마다 열 수·필요 외경)으로 고릅니다. Boeing 항목은 자리만 있으며 기종이 없어 “---”로 표시됩니다.</li>
+        <li><b>프리셋·커스텀</b>: Airbus 공식 프리셋은 스펙에 맞춰져 있어 <b>조회 전용</b>(입력 전부 비활성)이며, 고를 때마다 기본값에서 시작해 공식 보정값만 적용하므로 이전 작업값이 섞이지 않습니다. “커스텀” 제작사에는 항상 조정 가능한 <b>작업 설정</b>(저장 안 함)과 직접 만든 <b>커스텀 기종</b>이 있습니다. “＋ 커스텀”은 지금 보고 있는 기종(프리셋·작업 설정·다른 커스텀)을 복사해 새 커스텀 기종을 만들고, 이름 변경·삭제가 가능합니다. 프리셋을 보러 갔다 와도 조정 중이던 상태(저장 안 된 변경 포함)는 그대로 유지되고(“돌아가기” 버튼), <b>저장</b>을 눌러야 이 브라우저(localStorage)에 보관되며 <b>변경 취소</b>로 마지막 저장본으로 되돌립니다. 저장 안 된 변경은 새로고침하면 사라지고, 저장소를 쓸 수 없는 환경에서는 이번 세션에만 유지됩니다.</li>
         <li><b>치수 연동</b>: 승객 수·행 수·전장·외경은 하나의 상태에서 서로 계산됩니다. 마지막으로 조작한 값이 <b>기준</b>이고 나머지는 <b>자동</b>입니다 — 승객 수·행 수를 바꾸면 전장(과 배열의 필요 외경)이, 전장·외경을 바꾸면 승객 수·행 수(와 배열)가 따라 움직입니다. 피치·좌석 폭·통로 같은 다른 값도 같은 상태를 거치므로 결과가 즉시 반영됩니다. 승객 수의 한계는 고정값이 아니라 <b>현재 배열·피치·좌석 폭으로 전장 슬라이더 상한(협동체 60 m · 광동체 90 m, 모델 범위)까지 배치되는 행 수</b>로 계산합니다(예: 3-3 · 피치 31 in → 최대 306석). 목표 승객 수가 현재 배열의 한계를 넘으면 가로 좌석 수가 더 많은 배열(협동체 2-2 → 3-2 → 3-3 → 광동체 2-3-2 → 2-4-2 → 3-3-3 → 3-4-3)로 자동 전환하며, 광동체로 넘어갈 때는 광동체 기본 통로 20 in · 쉘 6 in를 적용합니다. 승객 수를 줄이면 원래 구성(통로·쉘 값 포함)으로 돌아갑니다. 기종 프리셋은 공식 전장·외경을 기준으로 승객 수를 계산합니다. 전장 상한은 설계 가정이며 실제 기종의 한계가 아닙니다.</li>
         <li><b>좌석 폭</b> = 팔걸이 사이 쿠션 폭, 팔걸이는 인접 좌석이 공유합니다 (팔걸이 수 = 좌석 수 + 좌석 군 수).</li>
         <li><b>곡률 보정</b>: 바닥이 단면 중심 아래(반경의 16%, A320 도면에서 역산한 가정)에 있다고 보고, 팔걸이 높이(25 in = 0.635 m)에서의 객실 폭과 바닥 가장자리가 단면 안에 들어가는 최소 반경을 닫힌 형태로 계산합니다.</li>
@@ -359,14 +394,12 @@ const THEMES = {
     shellFill: '#cbd5e1', shellLine: '#64748b', inner: '#ffffff', innerLine: '#94a3b8', cargo: '#e2e8f0', cargoTxt: '#475569', floor: '#94a3b8', cross: '#cbd5e1',
     aisleBand: 'rgba(217,119,6,.14)', aisleBandLine: 'rgba(180,83,9,.75)', aisleTxt: '#92400e', dc: '#475569', callout: '#475569', center: '#475569', diTxt: '#0369a1', red: '#dc2626' }
 };
-let TH = THEMES.dark, themePref = 'auto';
+let TH = THEMES.dark, themeEff = 'dark', themeSaved = false;
 const lightMQ = window.matchMedia ? matchMedia('(prefers-color-scheme: light)') : null;
-function applyTheme(pref, save) {
-  themePref = pref;
-  const eff = pref === 'auto' ? (lightMQ && lightMQ.matches ? 'light' : 'dark') : pref;
-  document.documentElement.setAttribute('data-theme', eff); TH = THEMES[eff];
-  if (save) { try { localStorage.setItem('cabinSimTheme', pref); } catch (e) {} }
-  document.querySelectorAll('#themeSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === pref));
+function applyTheme(eff, save) {
+  themeEff = eff; document.documentElement.setAttribute('data-theme', eff); TH = THEMES[eff];
+  if (save) { themeSaved = true; try { localStorage.setItem('cabinSimTheme', eff); } catch (e) {} }
+  const btn = $('#themeBtn'); if (btn) { btn.title = eff === 'dark' ? '라이트 모드로 전환' : '다크 모드로 전환'; btn.setAttribute('aria-label', btn.title); }
   dirty = true;
 }
 
@@ -821,28 +854,6 @@ function syncControls() {
   if (pl) $('#planTxt').textContent = `— 공식 도면 ${pl.length}쌍(${pl.map(d => d.x.toFixed(2) + ' m ' + d.t).join(' · ')})${RES && RES.c.plan ? '' : ' · 현재 행 수 부족 또는 60 ft 초과로 미적용'}`;
   syncPresetUI();
 }
-let uiMaker = MAKERS[0];
-function fillModels(maker) {
-  const sel = $('#modelSel'), list = PRESETS.filter(p => p.maker === maker);
-  sel.innerHTML = '';
-  if (!list.length) { sel.add(new Option('---', '')); sel.options[0].disabled = true; return; }      // 아직 프리셋이 없는 제작사: 항목만 표시
-  sel.add(new Option('기종 선택…', ''));
-  [...new Set(list.map(p => p.fam))].forEach(f => {
-    const g = document.createElement('optgroup'); g.label = f;
-    list.filter(p => p.fam === f).forEach(p => g.appendChild(new Option(p.name + (p.cal ? ' · 보정' : ''), p.id)));
-    sel.appendChild(g);
-  });
-}
-let lastPsId = null;
-function syncPresetUI() {
-  const ps = PRESETS.find(p => p.id === activePreset);
-  if (ps && ps.id !== lastPsId && uiMaker !== ps.maker) { uiMaker = ps.maker; fillModels(uiMaker); }   // 프리셋이 바뀐 때만 제작사 선택을 따라감
-  lastPsId = ps ? ps.id : null;
-  const shown = ps && ps.maker === uiMaker ? ps : null;
-  $('#makerSel').value = uiMaker; $('#modelSel').value = shown ? shown.id : '';
-  $('#presetInfo').textContent = shown ? `전장 ${ps.L} m · 외경 ${ps.Do} m · 최대 객실 폭 ${ps.Wcab} m${ps.cal ? ' · 공식 도면 보정값 적용' : ''}`
-    : (PRESETS.some(p => p.maker === uiMaker) ? '기종을 고르면 공식 전장·외경과 보정값을 불러옵니다. 오차는 우측 하단 표에서 확인하세요.' : '이 제작사의 기종 데이터는 아직 준비 중입니다.');
-}
 function fillLayoutSel() {
   /* 동체 형식 + 좌석 배열을 한 목록으로: 항목마다 열 수와 필요 외경, 동체 주도에서는 현재 외경에 들어가는지(✓/✗) */
   const sel = $('#layoutSel'); sel.innerHTML = '';
@@ -874,13 +885,132 @@ function setBody(b) {
   activePreset = null; view.auto = true;
 }
 function applyPreset(id) {
+  /* 프리셋은 조회 전용: 이전 작업 설정이 섞이지 않도록 모든 값을 기본값에서 시작해 공식 보정값을 적용하고, 공식 전장·외경을 기준으로 승객 수를 계산 */
   const ps = PRESETS.find(p => p.id === id); activePreset = id;
-  CAL_KEYS.forEach(k => { P[k] = DEF[k]; });             // 이전 프리셋의 보정값을 되돌린 뒤 적용
-  if (ps.cal) Object.assign(P, ps.cal);
-  Object.assign(P, { mode: 'fuse', base: null, body: ps.body, layout: ps.layout, fuseL: ps.L, fuseD: ps.Do, autoLayout: false });   // 공식 전장·외경을 기준으로 승객 수·행 수를 계산
+  P = Object.assign({}, DEF, ps.cal || {}, { mode: 'fuse', body: ps.body, layout: ps.layout, fuseL: ps.L, fuseD: ps.Do, autoLayout: false });
   view.auto = true;
 }
 
+/* ---------------------------------------------------------------------
+   5b. 커스텀 기종: 작업 설정(저장 안 함) + 사용자가 만든 커스텀 기종 (저장하면 브라우저 localStorage 에 보관)
+   - 공식 프리셋은 조회 전용(입력 비활성), 작업 설정·커스텀 기종은 모든 값을 조정할 수 있다.
+   - 조정 중인 내용은 프리셋을 보러 갔다 와도 그대로 유지된다(draft). 저장 버튼을 눌러야 보관되고, 변경 취소로 마지막 저장본으로 되돌린다.
+   --------------------------------------------------------------------- */
+const CUSTOM = '커스텀', MAKER_LIST = [...MAKERS, CUSTOM];
+let customs = [], activeCustom = null, workP = null, returnKey = null, storageOK = true, uiMaker = CUSTOM, lastKey = null;
+const clone = o => JSON.parse(JSON.stringify(o));
+const customEntry = () => customs.find(c => c.id === activeCustom) || null;
+const curKey = () => activePreset ? 'p:' + activePreset : activeCustom ? 'c:' + activeCustom : 'work';
+const sig = st => JSON.stringify(st, (k, v) => typeof v === 'number' ? Math.round(v * 1e6) / 1e6 : v);
+function cleanState(st) {                                   // 저장값 검증: 알려진 키만, 형이 맞는 값만 (깨진 저장값이 해석기를 망가뜨리지 않도록)
+  const out = Object.assign({}, DEF);
+  Object.keys(DEF).forEach(k => {
+    const v = st && st[k], d = DEF[k];
+    if (typeof d === 'number') { if (typeof v === 'number' && isFinite(v)) out[k] = v; }
+    else if (typeof d === 'string') { if (typeof v === 'string') out[k] = v; }
+    else if (typeof d === 'boolean') { if (typeof v === 'boolean') out[k] = v; }
+    else if (k === 'doorPlan') out[k] = Array.isArray(v) && v.length >= 3 && v.every(e => e && typeof e.x === 'number' && isFinite(e.x) && TYPE[e.t]) ? v : null;
+  });
+  if (!LAYOUTS[out.body]) out.body = DEF.body;
+  if (!LAYOUTS[out.body].includes(out.layout)) out.layout = DEF_LAYOUT[out.body];
+  if (out.mode !== 'seat' && out.mode !== 'fuse') out.mode = 'seat';
+  if (out.basis !== 'pax' && out.basis !== 'rows') out.basis = 'pax';
+  return out;
+}
+function restoreState(raw) {                                // 조정 중이던 상태 복원: 자동 전환 복귀 정보(base)까지 같이
+  const st = cleanState(raw), b = raw && raw.base;
+  if (b && typeof b === 'object' && LAYOUTS[b.body] && LAYOUTS[b.body].includes(b.layout) && typeof b.aisleIn === 'number' && typeof b.shellIn === 'number')
+    st.base = { body: b.body, layout: b.layout, aisleIn: b.aisleIn, shellIn: b.shellIn, doorPlan: cleanState({ doorPlan: b.doorPlan }).doorPlan, preset: null };
+  return st;
+}
+function flushCustoms() {                                   // 저장된 상태만 보관 (조정 중인 draft 는 메모리에만)
+  try { localStorage.setItem('cabinSimCustoms', JSON.stringify({ v: 2, customs: customs.map(c => ({ id: c.id, name: c.name, from: c.from, state: c.state })) })); storageOK = true; } catch (e) { storageOK = false; }
+}
+function loadCustoms() {
+  try {
+    const raw = localStorage.getItem('cabinSimCustoms');
+    const j = raw ? JSON.parse(raw) : null;
+    if (j && Array.isArray(j.customs)) customs = j.customs.filter(c => c && typeof c.id === 'string' && typeof c.name === 'string' && c.state && typeof c.state === 'object')
+      .map(c => ({ id: c.id, name: c.name.slice(0, 30), from: PRESETS.some(p => p.id === c.from) ? c.from : null, state: cleanState(c.state), draft: null }));
+    localStorage.setItem('cabinSimProbe', '1'); localStorage.removeItem('cabinSimProbe'); storageOK = true;
+  } catch (e) { storageOK = false; }
+}
+function nextCustomName() {
+  const used = new Set(customs.map(c => c.name)); let n = 1;
+  while (used.has('커스텀 기종 ' + n)) n++;
+  return '커스텀 기종 ' + n;
+}
+function trackWork() {
+  /* update() 마다 호출: 조정 중인 상태를 작업 설정(workP)·커스텀 기종 draft 에 보관. 저장본과 다르면 draft 로 표시 */
+  const c = customEntry();
+  if (c) {
+    const dirty = sig(cleanState(P)) !== sig(c.state), was = !!c.draft;
+    c.draft = dirty ? clone(P) : null;
+    if (dirty !== was) refreshModelList();
+  } else if (!activePreset) workP = clone(P);
+}
+function selectKey(key) {
+  if (!activePreset) returnKey = curKey();                 // 프리셋을 보러 가기 전 상태 (돌아가기 버튼용). 상태 자체는 trackWork 가 이미 보관 중
+  if (key.startsWith('p:')) { activeCustom = null; applyPreset(key.slice(2)); return; }
+  if (key === 'work') { activePreset = null; activeCustom = null; P = restoreState(workP || DEF); }
+  else { const c = customs.find(c => 'c:' + c.id === key); if (!c) return; activePreset = null; activeCustom = c.id; P = restoreState(c.draft || c.state); }
+  view.auto = true;
+}
+function createCustom() {
+  /* 현재 기종(프리셋·작업 설정·다른 커스텀)의 값을 복사해 새 커스텀 기종으로 만들고 바로 전환. 작업 설정·원본 커스텀의 조정 중 상태는 그대로 둔다 */
+  const cu = customEntry(), from = activePreset || (cu ? cu.from : null) || null, cur = restoreState(P);
+  const c = { id: 'c' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), name: nextCustomName(), from, state: cleanState(P), draft: null };
+  if (!activePreset) returnKey = curKey();
+  customs.push(c); activePreset = null; activeCustom = c.id; P = cur; flushCustoms();
+}
+function saveCustom() { const c = customEntry(); if (!c) return; c.state = cleanState(P); c.draft = null; flushCustoms(); refreshModelList(); }
+function revertCustom() { const c = customEntry(); if (!c) return; c.draft = null; P = restoreState(c.state); view.auto = true; refreshModelList(); }
+function deleteCustom() {
+  const i = customs.findIndex(c => c.id === activeCustom); if (i < 0) return;
+  if (returnKey === 'c:' + activeCustom) returnKey = null;
+  customs.splice(i, 1); activeCustom = null; activePreset = null; P = restoreState(workP || DEF); view.auto = true; flushCustoms();
+}
+function fillModels(maker) {
+  const sel = $('#modelSel'); sel.innerHTML = '';
+  if (maker === CUSTOM) {
+    sel.add(new Option('작업 설정 (저장 안 함)', 'work'));
+    customs.forEach(c => sel.add(new Option(c.name + (c.draft ? ' ●' : ''), 'c:' + c.id)));
+    return;
+  }
+  const list = PRESETS.filter(p => p.maker === maker);
+  if (!list.length) { sel.add(new Option('---', '')); sel.options[0].disabled = true; return; }      // 아직 프리셋이 없는 제작사: 항목만 표시
+  sel.add(new Option('기종 선택…', ''));
+  [...new Set(list.map(p => p.fam))].forEach(f => {
+    const g = document.createElement('optgroup'); g.label = f;
+    list.filter(p => p.fam === f).forEach(p => g.appendChild(new Option(p.name + (p.cal ? ' · 보정' : ''), 'p:' + p.id)));
+    sel.appendChild(g);
+  });
+}
+function refreshModelList() { if (uiMaker === CUSTOM) { fillModels(CUSTOM); $('#modelSel').value = curKey(); } }
+function syncPresetUI() {
+  const key = curKey(), ps = PRESETS.find(p => p.id === activePreset), cu = customEntry(), keyMaker = ps ? ps.maker : CUSTOM;
+  if (key !== lastKey) { uiMaker = keyMaker; fillModels(uiMaker); lastKey = key; }   // 선택한 기종이 바뀐 때만 제작사 표시를 따라감
+  $('#makerSel').value = uiMaker; $('#modelSel').value = keyMaker === uiMaker ? key : '';
+  const lock = !!ps;                                                              // 공식 프리셋: 모든 입력 비활성(조회 전용)
+  $('#lockable').disabled = lock; $('#lockMsg').classList.toggle('on', lock);
+  if (lock) {                                                                     // 조정하던 상태로 돌아가기
+    const rc = returnKey && returnKey.startsWith('c:') ? customs.find(c => 'c:' + c.id === returnKey) : null, back = rc ? rc.name : '작업 설정';
+    $('#backBtn').textContent = `↩ 돌아가기 — ${back}${rc && rc.draft || !rc && workP ? ' (조정 중 상태 유지)' : ''}`; $('#backBtn').dataset.key = rc ? returnKey : 'work';
+  }
+  $('#customBox').classList.toggle('on', !!cu);
+  if (cu) {
+    const dirty = !!cu.draft;
+    if (document.activeElement !== $('#customName')) $('#customName').value = cu.name;
+    $('#saveState').textContent = dirty ? '● 저장되지 않은 변경이 있습니다' : '✓ 저장됨'; $('#saveState').className = 'small ' + (dirty ? 'dirtytxt' : '');
+    $('#customSave').disabled = !dirty; $('#customRevert').disabled = !dirty;
+  }
+  const orig = cu && cu.from ? PRESETS.find(p => p.id === cu.from) : null;
+  $('#presetInfo').textContent = keyMaker !== uiMaker
+    ? (uiMaker === CUSTOM ? '' : PRESETS.some(p => p.maker === uiMaker) ? '기종을 고르면 공식 전장·외경과 보정값을 불러옵니다 (조회 전용).' : '이 제작사의 기종 데이터는 아직 준비 중입니다.')
+    : ps ? `전장 ${ps.L} m · 외경 ${ps.Do} m · 최대 객실 폭 ${ps.Wcab} m${ps.cal ? ' · 공식 도면 보정값 적용' : ''} · 조회 전용`
+    : cu ? `커스텀 기종${orig ? ` · 원본 ${orig.name}` : ''} · 모든 값 조정 가능, 저장 버튼으로 보관${storageOK ? '' : ' (저장소를 쓸 수 없어 이번 세션에만 유지)'}`
+    : '작업 설정 · 모든 값을 조정할 수 있습니다. 보관하려면 ＋ 커스텀을 누르세요.';
+}
 /* ---------------------------------------------------------------------
    6. LOPA 렌더링 (Canvas) — 월드 좌표(m): x = 기수에서 후방, y = 횡방향(아래=좌현)
    --------------------------------------------------------------------- */
@@ -1288,7 +1418,7 @@ function updatePanels() {
 }
 function errCls(e) { const a = Math.abs(e); return a <= 3 ? 'ok' : a <= 8 ? 'warn' : 'bad'; }
 function updateCompare() {
-  const host = $('#cmp'), ps = PRESETS.find(p => p.id === activePreset);
+  const host = $('#cmp'), cuc = customEntry(), ps = PRESETS.find(p => p.id === (activePreset || (cuc && cuc.from)));   // 커스텀 기종은 복사해 온 원본 프리셋과 비교
   if (!ps) { host.innerHTML = '<p class="small">좌측 “기종 프리셋”에서 제작사와 기종을 선택하세요. 현재 설정으로 계산한 값과 Airbus 공식 제원의 오차를 보여줍니다.</p>'; return; }
   const X = cross(parse(ps.layout), P, null);
   const Ln = noseLen(P, X.DoReq), Lt = P.tailK * X.DoReq, ov = Math.min(P.overlapK * X.DoReq, Lt);
@@ -1314,7 +1444,7 @@ function updateCompare() {
     const same = Object.keys(ps.cal).every(k => typeof ps.cal[k] === 'number' ? Math.abs(P[k] - ps.cal[k]) < 1e-9 : typeof ps.cal[k] === 'object' ? JSON.stringify(P[k]) === JSON.stringify(ps.cal[k]) : P[k] === ps.cal[k]);
     calInfo = `<p class="small" style="margin:8px 0 0"><b style="color:var(--acc)">${same ? '보정값 적용됨' : '보정값이 수정됨'}</b> — 좌석 쿠션 ${ps.cal.seatIn} + 팔걸이 ${ps.cal.armIn} in(좌석 모듈 ${(ps.cal.seatIn + ps.cal.armIn).toFixed(1)} in) · 통로 ${ps.cal.aisleIn} in · 측벽 여유 ${ps.cal.clrIn} in · 쉘 ${ps.cal.shellIn} in · 꼬리 내 객실 중첩 ${ps.cal.overlapK}D${ps.cal.pitchIn ? ` · 피치 ${ps.cal.pitchIn} in · 화장실 1/${ps.cal.lavPer}명` : ''}. 좌석·통로·팔걸이·여유의 공식 mm 값은 확인하지 못해, 공식 외경·최대 객실 폭·비객실 길이에 맞춰 역산한 값입니다. ${ps.note || ''}${same ? '' : ' <a href="#" id="recal" style="color:var(--acc)">보정값 다시 적용</a>'}</p>`;
   }
-  host.innerHTML = `<table><thead><tr><th>${ps.name} (${ps.layout})</th><th>시뮬</th><th>공식</th><th>오차</th></tr></thead><tbody>
+  host.innerHTML = `<table><thead><tr><th>${ps.name} (${ps.layout})${activePreset ? '' : ' · 원본 대비'}</th><th>시뮬</th><th>공식</th><th>오차</th></tr></thead><tbody>
     ${row('동체 외경 (m)', X.DoReq, ps.Do)}
     ${row('객실 최대폭 vs 내경 (m)', X.DiReq, ps.Wcab)}
     ${ps.Lcab != null ? row('비객실 길이 = 전장−객실 (m)', Ln + Lt - ov, ps.L - ps.Lcab) : '<tr><td>비객실 길이 (m)</td><td colspan=3 class="small">객실 길이 공식값 미확인</td></tr>'}
@@ -1324,7 +1454,12 @@ function updateCompare() {
     <tr><td>공식 전장 안 최대 승객 (시뮬, 참고)</td><td colspan="2">${paxF}석</td><td></td></tr></tbody></table>
     ${calInfo}
     <p class="small" style="margin:8px 0 0">공식 값은 Airbus 제품 페이지의 전장·객실 길이·동체 폭·최대 객실 폭입니다. 승객 수는 모델 계산 참고값이며 공식 좌석 수가 아닙니다. 3% 이내 초록 · 8% 이내 노랑.</p>`;
-  const rc = $('#recal'); if (rc) rc.onclick = e => { e.preventDefault(); applyPreset(activePreset); update(); };
+  const rc = $('#recal'); if (rc) rc.onclick = e => {
+    e.preventDefault();
+    if (activePreset) applyPreset(activePreset);
+    else { const keep = { mode: P.mode, basis: P.basis, pax: P.pax, rows: P.rows, fuseL: P.fuseL, fuseD: P.fuseD, body: P.body, layout: P.layout }; CAL_KEYS.forEach(k => { P[k] = DEF[k]; }); Object.assign(P, ps.cal || {}, keep); }
+    update();
+  };
 }
 
 /* ---------------------------------------------------------------------
@@ -1334,6 +1469,7 @@ function update() {
   if (P.mode === 'seat' && P.basis === 'pax') escalate();   // 피치·좌석 폭 등을 바꿔도 목표 승객 수를 수용하도록 배열·형식 유지
   RES = solve(P);
   linkBack(RES);
+  trackWork();
   syncControls(); updatePanels(); dirty = true;
 }
 function frame() {
@@ -1346,19 +1482,33 @@ new ResizeObserver(() => { dirty = true; }).observe(xv);
 function init() {
   mkSliders($('#slDrive'), SLIDERS.drive);
   mkSliders($('#slCommon'), SLIDERS.common); mkSliders($('#slAdv'), SLIDERS.adv); mkSliders($('#slAdv2'), SLIDERS.adv2);
-  applyTheme(((() => { try { return localStorage.getItem('cabinSimTheme'); } catch (e) { return null; } })()) || 'auto', false);
-  document.querySelectorAll('#themeSeg button').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.v, true)));
-  if (lightMQ && lightMQ.addEventListener) lightMQ.addEventListener('change', () => { if (themePref === 'auto') applyTheme('auto', false); });
-  $('#makerSel').innerHTML = MAKERS.map(m => `<option value="${m}">${m}</option>`).join(''); fillModels(uiMaker);
+  let savedTheme = null; try { savedTheme = localStorage.getItem('cabinSimTheme'); } catch (e) {}
+  themeSaved = savedTheme === 'light' || savedTheme === 'dark';
+  applyTheme(themeSaved ? savedTheme : (lightMQ && lightMQ.matches ? 'light' : 'dark'), false);
+  $('#themeBtn').onclick = () => applyTheme(themeEff === 'dark' ? 'light' : 'dark', true);
+  if (lightMQ && lightMQ.addEventListener) lightMQ.addEventListener('change', () => { if (!themeSaved) applyTheme(lightMQ.matches ? 'light' : 'dark', false); });
+  loadCustoms();
+  $('#makerSel').innerHTML = MAKER_LIST.map(m => `<option value="${m}">${m}</option>`).join(''); fillModels(uiMaker);
   $('#makerSel').onchange = e => { uiMaker = e.target.value; fillModels(uiMaker); syncPresetUI(); };
-  $('#modelSel').onchange = e => { if (e.target.value) applyPreset(e.target.value); else activePreset = null; update(); };
+  $('#modelSel').onchange = e => { if (e.target.value) selectKey(e.target.value); update(); };
+  $('#customBtn').onclick = () => { createCustom(); update(); };
+  $('#backBtn').onclick = e => { selectKey(e.currentTarget.dataset.key || 'work'); update(); };
+  $('#customSave').onclick = () => { saveCustom(); update(); };
+  $('#customRevert').onclick = () => { revertCustom(); update(); };
+  $('#customName').oninput = e => { const c = customEntry(), v = e.target.value.trim(); if (c && v) { c.name = v; flushCustoms(); refreshModelList(); } };
+  $('#customName').onchange = e => { const c = customEntry(); if (c) e.target.value = c.name; };
+  let delArmed = null; const disarm = () => { clearTimeout(delArmed); delArmed = null; $('#customDel').textContent = '삭제'; $('#customDel').classList.remove('armed'); };
+  $('#customDel').onclick = () => {
+    if (delArmed == null) { $('#customDel').textContent = '정말 삭제'; $('#customDel').classList.add('armed'); delArmed = setTimeout(disarm, 3000); return; }
+    disarm(); deleteCustom(); update();
+  };
   $('#layoutSel').onchange = e => { const [body, ls] = e.target.value.split('|'); pickLayout(body, ls); update(); };
   $('#autoLayout').onchange = e => { P.autoLayout = e.target.checked; view.auto = true; update(); };
   $('#exitAuto').onchange = e => { P.exitAuto = e.target.checked; update(); };
   $('#aftFront').onchange = e => { P.aftFront = e.target.checked; update(); };
-  $('#planClear').onclick = e => { e.preventDefault(); P.doorPlan = null; update(); };
-  $('#resetAll').onclick = () => { P = Object.assign({}, DEF); activePreset = null; view.auto = true; update(); };
-  $('#ruleDef').onclick = () => { Object.assign(P, RULE_DEF, { aisleIn: BODY_DEF[P.body].aisle, base: null }); activePreset = null; update(); };
+  $('#planClear').onclick = e => { e.preventDefault(); if (activePreset) return; P.doorPlan = null; update(); };
+  $('#resetAll').onclick = () => { if (activePreset) return; P = Object.assign({}, DEF); view.auto = true; update(); };
+  $('#ruleDef').onclick = () => { if (activePreset) return; Object.assign(P, RULE_DEF, { aisleIn: BODY_DEF[P.body].aisle, base: null }); update(); };
   update(); requestAnimationFrame(frame);
 }
 
