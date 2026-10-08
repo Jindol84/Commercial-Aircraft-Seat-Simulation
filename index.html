@@ -172,13 +172,13 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
       <ul>
         <li><b>좌석 폭</b> = 팔걸이 사이 쿠션 폭, 팔걸이는 인접 좌석이 공유합니다 (팔걸이 수 = 좌석 수 + 좌석 군 수).</li>
         <li><b>곡률 보정</b>: 바닥이 단면 중심 아래(반경의 16%, A320 도면에서 역산한 가정)에 있다고 보고, 팔걸이 높이(25 in = 0.635 m)에서의 객실 폭과 바닥 가장자리가 단면 안에 들어가는 최소 반경을 닫힌 형태로 계산합니다.</li>
-        <li><b>기수·꼬리</b>: 기수 1.16D · 꼬리 원추 2.5D · 꼬리 내 객실 중첩 1.11D(비객실 길이 ≈ 2.55D)는 A320 도어 위치(전방 도어 5.04 m)와 비객실 길이 10.06 m에서 역산한 값입니다. 요구 규칙의 원래 값은 기수 1.4D · 중첩 없음(꼬리 2.5D)이었고, 실제 기종은 후방 객실이 꼬리 원추 안으로 들어가므로 중첩 계수를 둡니다(비객실 길이 A320 2.55D · A330-300 2.36D · A350-900 2.65D).</li>
-        <li><b>기본값 변경 내역(A320 기준)</b>: 측벽 여유 3.5→0.1 in · 쉘 6→4.9 in · 바닥 위치 10→16% · 기수 1.4→1.16D · 꼬리 중첩 1.4→1.11D · 후방 모듈 2.5→3.0 m(도어 앞쪽) · 오버윙 두 출구 인접 열 · 출구열 추가 피치 +10 in→2.5 in(A320 오버윙 출구 간격 0.85 m 반영) · 윙 위치 42→38% · 단일통로 20→19 in(원래 규칙값이자 A320 도면 값). 좌석 18 in · 팔걸이 2 in · 피치 31 in는 그대로입니다. 광동체 기본값은 통로 20 in · 쉘 6 in를 씁니다.</li>
+        <li><b>기수·꼬리</b>: 기수 1.135D · 꼬리 원추 2.5D · 꼬리 내 객실 중첩 1.09D(비객실 길이 ≈ 2.55D)는 A320 도어 위치(전방 도어 5.04 m)와 비객실 길이 10.06 m에서 역산한 값입니다(A321도 전장 44.51 m − 객실 길이 34.44 m = 10.07 m로 같은 비율). 요구 규칙의 원래 값은 기수 1.4D · 중첩 없음(꼬리 2.5D)이었고, 실제 기종은 후방 객실이 꼬리 원추 안으로 들어가므로 중첩 계수를 둡니다(비객실 길이 A320 2.55D · A330-300 2.36D · A350-900 2.65D).</li>
+        <li><b>기본값 변경 내역(A320 기준)</b>: 측벽 여유 3.5→0.1 in · 쉘 6→4.9 in · 바닥 위치 10→16% · 기수 1.4→1.135D · 꼬리 중첩 1.4→1.09D · 후방 모듈 2.5→3.03 m(도어 앞쪽) · 협동체 Type I 도어 폭 0.61→0.81 m(A320 계열) · 오버윙 두 출구 인접 열 · 출구열 추가 피치 +10 in→2.5 in(A320 오버윙 출구 간격 0.85 m 반영) · 윙 위치 42→38% · 단일통로 20→19 in(원래 규칙값이자 A320 도면 값). 좌석 18 in · 팔걸이 2 in · 피치 31 in는 그대로입니다. 광동체 기본값은 통로 20 in · 쉘 6 in를 씁니다.</li>
         <li><b>A320 프리셋 (Airbus 도면 기준)</b>: 사용자가 제공한 <a href="https://www.aircraft.airbus.com/sites/g/files/jlcbta126/files/2025-01/AC_A320_0624.pdf">A320 Aircraft Characteristics</a> 발췌 도면을 그대로 썼습니다. 6열 단면: 와이더 시트 = 좌석 18 in · 3연석 62 in · 통로 19 in · 합계 143 in(3.63 m), 와이더 통로 = 좌석 17 in · 3연석 59 in · 통로 25 in · 합계 143 in. 3연석 폭이 3×좌석+4×2 in와 정확히 같아 <b>좌석 폭은 팔걸이 사이 쿠션 폭, 팔걸이는 2 in(공유)</b>로 읽힙니다(도면 산술에서 도출). 도어 위치 도면(FIGURE-2-7-0-991-003-A01): 기수에서 전방 도어 5.04 m · 오버윙 출구 14.43/15.28 m · 후방 도어 29.53 m (도어 중심선으로 읽음). 이전 버전의 “18 in 좌석 = 팔걸이 포함 모듈” 해석은 이 도면으로 <b>틀린 것이 확인되어 철회</b>했습니다(그 해석은 바닥 위치 10% 가정에서 나온 착시였습니다).</li>
-        <li><b>역산·가정 값</b>: 바닥 위치 16%와 측벽 여유 0.1 in는 위 좌석 치수(143 in)가 내경 3.70 m 안에 들어가도록 역산한 값이며 공식 값이 아닙니다. 기수 1.16D · 꼬리 중첩 1.11D · 후방 모듈 3.0 m(도어 앞쪽) · 오버윙 출구 인접 2열 · 출구열 추가 피치 2.5 in는 비객실 길이 10.06 m와 도어 4곳(전방 5.04 · 오버윙 14.43/15.28 · 후방 29.53 m)에 맞춘 값입니다. 오버윙 두 출구가 0.85 m(인접 열) 간격이라 규칙의 “출구열 +10 in”는 A320 실제보다 큽니다. 도면에는 하단 화물칸 위치·치수와 4열 퍼스트 클래스(좌석 22.6 in · 통로 27 in) 도면도 있었으나 이코노미 단일 클래스 모델이라 쓰지 않았습니다.</li>
+        <li><b>역산·가정 값</b>: 바닥 위치 16%와 측벽 여유 0.1 in는 위 좌석 치수(143 in)가 내경 3.70 m 안에 들어가도록 역산한 값이며 공식 값이 아닙니다. 기수 1.135D · 꼬리 중첩 1.09D · 후방 모듈 3.03 m(도어 앞쪽) · 오버윙 출구 인접 2열 · 출구열 추가 피치 2.5 in는 비객실 길이 10.06 m와 도어 4곳(전방 5.04 · 오버윙 14.43/15.28 · 후방 29.53 m)에 맞춘 값입니다. 오버윙 두 출구가 0.85 m(인접 열) 간격이라 규칙의 “출구열 +10 in”는 A320 실제보다 큽니다. 도면에는 하단 화물칸 위치·치수와 4열 퍼스트 클래스(좌석 22.6 in · 통로 27 in) 도면도 있었으나 이코노미 단일 클래스 모델이라 쓰지 않았습니다.</li>
         <li><b>A330-300 (Airbus 도면 기준)</b>: 사용자가 제공한 A330 Aircraft Characteristics 발췌 도면을 썼습니다. 이코노미 8열 단면: 2석 유닛 42 in · 4석 유닛 82 in · 통로 18/19 in · 합계 204 in(5.18 m) → 연립방정식으로 <b>좌석 18 in · 팔걸이 2 in</b>(A320과 같은 구조), 통로 평균 19 in. 도어(기수에서, 중심선으로 읽음): 5.85 · 17.74 · 35.96 · 50.96 m, 중앙·후방 도어 폭 1.07 m(Type A 42 in), 비상구 도어 3 폭 0.81 m(<a href="https://www.ecfr.gov/current/title-14/chapter-I/subchapter-C/part-25/subpart-D/subject-group-ECFR88992669bab3b52/section-25.807">Type B 32 in</a>와 일치 — 도면에 종류 표기는 없어 폭으로 판단), 도어 1은 도면에 없어 Type A 가정. 꼬리 원추 시작 52.43 m → 꼬리 1.99D. 대표 구성(300석: 비즈니스 36 + 이코노미 264, 8열 32 in 피치, 갤리 6 · 화장실 9)에서 피치 32 in · 화장실 1/33명. 도어 위치 고정은 약 33행 이상에서 적용되며, 그보다 작으면 자동 출구 구성을 씁니다. 바닥 위치 16%·측벽 여유 0.1 in는 A320 도면에서 역산한 가정입니다.</li>
         <li><b>A350-900 (Airbus 도면 기준)</b>: 이코노미 9열 단면은 3연석 유닛 60.11 in · 좌석 18 in · 사이 1.5 in · 통로 18.1 in → <b>좌석 18 in · 팔걸이 1.5 in</b>(A320·A330의 2 in와 다름). 도어(기수에서, 중심선으로 읽음) 6.82 · 18.86 · 37.93 · 52.55 m, 도어 폭 1.26 m × 높이 2.16 m(도어 3 만 2.11 m): <a href="https://www.slideshare.net/slideshow/a3501000airportcompatibilitybrochureaugust2014pdf/266396824">공항 호환성 브로셔</a>(2.164×1.262 m, 도어 3 만 2.113 m)·<a href="https://aircraftinvestigation.info/airplanes/Airbus_A350-900.html">성능 자료</a>(2.16×1.26 m, Type A+)와 일치해 FAR Type A 최소(42×72 in)보다 큰 “Type A+”로 반영(출구 상한은 Type A와 같은 110석). 평면 배치(315석, 비즈니스 48 + 이코노미 267, 8열이 아닌 9열 32 in 피치, 화장실 9)에서 피치 32 in · 화장실 1/35명. <b>이 AC 도면은 전장 66.61 m(현행 페이지 66.80 m)·단면 내경 ≈ 5.6 m로 2022년 객실 확대 이전 개정판으로 보이며 개정 일자는 확인하지 못했습니다.</b> 그래서 “A350-900 개정 전” 프리셋에는 도면 값을 그대로 쓰고(측벽 여유 2.0 in 역산), 현행 프리셋은 같은 좌석·통로·도어 값에 확대된 폭을 측벽 여유 4.1 in로 처리했습니다(차이 2.1 in는 Airbus의 “측벽 양쪽 2 in 확대” 설명과 일치). 도어 위치는 개정 전 값이라 현행 전장과 최대 0.19 m 어긋날 수 있고, A350의 꼬리 원추 시작점은 도면에 없어 꼬리 2.5D(원래 규칙)와 현행 비객실 길이 15.76 m를 가정했습니다. 바닥 위치 16%는 A320 도면에서 역산한 가정입니다.</li>
-        <li><b>A321</b>: 단면이 A320과 같아 같은 단면 치수와 전방 도어 위치 비율을 쓰고 도어·객실 길이는 확인하지 못했습니다.</li>
+        <li><b>A321 (부분 보정)</b>: 동체 단면이 A320과 같아(공식 페이지 3.95/3.70 m) 같은 단면·기수·꼬리 값을 씁니다. 객실 길이 34.44 m는 <a href="https://www.aircraft.airbus.com/en/aircraft/a320-family/a321ceo">Airbus A321ceo 페이지</a> 값이며 전장 44.51 m(SKYbrary와 일치)와 합친 비객실 길이 10.07 m가 A320(10.06 m)과 같아 A320 계수가 A321에도 맞습니다. <b>A320 계열 승객 도어 폭 0.81 m(32 in)</b>는 Airbus 훈련 자료(1.829×0.813 m)·<a href="https://aerospaceweb.org/aircraft/jetliner/a320/">Aerospaceweb</a>(1.85×0.81 m)·<a href="https://www.globalair.com/aircraft-for-sale/specifications?specid=639">GlobalAir</a>(6 ft 1 in × 2 ft 8 in)가 일치해 Type I 최소(24 in)가 아닌 이 폭을 협동체 기본 도어로 씁니다(출구 상한은 Type I 45석 유지, 높이는 출처마다 1.83~1.85 m). A321의 도어 위치(4쌍)·평면 배치는 도면이 없어 확인하지 못했고 자동 출구 구성입니다. 표준 단일 클래스 185석·최대 220석은 참고값입니다.</li>
         <li><b>첨부 보고서 교차검증</b>: 두 출처 이상에서 일치한 값만 사용했습니다 — A320 외경 3.95·객실 3.70 m·좌석 18 in·통로 19 in(Airbus 도면·페이지 + 보고서의 19~20 in), A350 외경 5.96 m(Airbus 팩트시트)·좌석 18 in(Airbus 기사), FAR 25.815 통로 20/15 in(eCFR). <b>A350 객실 폭은 보고서 5.61 m(221 in)가 2022년 확대 이전 값</b>이고 Airbus 현행은 5.71 m(225 in)입니다(Airbus 기사·<a href="https://www.insideflyer.com/posts/airbus-a350-cabin-design-elevates-long-haul-comfort/">Inside Flyer</a>와 대조). A330·A350의 통로 폭은 A320 외 공식 값을 찾지 못했습니다. 보고서의 B737·A220·B787·B777은 보고서 외 출처를 확인하지 못했고 전장·객실 길이가 없어 프리셋에 넣지 않았습니다.</li>
         <li><b>출구 체계</b>: ≤100석 Type I 2쌍 · 101~180석 Type I 2쌍 + 오버윙 Type III 2쌍 · 181~360석 Type I 4쌍 · 361석 이상 Type A 4쌍(확장). 60 ft 간격 위반 시 자동 보강합니다. 각 출구 상한의 합산 방식은 해석이므로 원문을 확인하세요.</li>
         <li><b>Type III 접근 통로</b>는 “출구열 추가 피치”를 통로 폭의 대리 지표로 쓰는 근사입니다 (3석 측 6 in×2 대안 = 12 in).</li>
@@ -218,7 +218,7 @@ const FONT = '"Pretendard","Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",
 
 /* 출구 종류: 개구부 w×h (in), 개소당 좌석 상한 — 14 CFR 25.807(a),(g) */
 const TYPE = { A: { w: 42, h: 72, cap: 110, nm: 'Type A', sh: 'A' }, AP: { w: 49.7, h: 85.2, cap: 110, nm: 'Type A+ (A350 확대형)', sh: 'A+' },
-  B: { w: 32, h: 72, cap: 75, nm: 'Type B', sh: 'B' }, I: { w: 24, h: 48, cap: 45, nm: 'Type I', sh: 'I' }, III: { w: 20, h: 36, cap: 35, nm: 'Type III', sh: 'III' } };
+  IP: { w: 32, h: 73, cap: 45, nm: 'Type I (A320 계열 0.81×1.85 m)', sh: 'I+' }, B: { w: 32, h: 72, cap: 75, nm: 'Type B', sh: 'B' }, I: { w: 24, h: 48, cap: 45, nm: 'Type I', sh: 'I' }, III: { w: 20, h: 36, cap: 35, nm: 'Type III', sh: 'III' } };
 const doorW = t => TYPE[t].w * IN;
 const vestLen = t => doorW(t) + 0.3;                   // 도어 앞 베스티뷸 길이
 const LAYOUTS = { narrow: ['2-2', '3-2', '3-3'], wide: ['2-3-2', '2-4-2', '3-3-3', '3-4-3'] };
@@ -234,12 +234,13 @@ const BODY_DEF = { narrow: { pax: 180, rows: 30, L: 37.57, D: 3.95, aisle: 19, s
    와이더 통로 = 좌석 17 in · 3연석 59 in(=3×17+4×2) · 통로 25 in · 합계 143 in → 좌석 폭은 팔걸이 사이 쿠션 폭, 팔걸이 2 in(도면 산술에서 도출).
    도어 위치 도면(FIGURE-2-7-0-991-003-A01): 기수에서 전방 도어 5.04 m · 오버윙 출구 14.43/15.28 m · 후방 도어 29.53 m (도어 중심선으로 읽음).
    바닥 위치 16% · 측벽 여유 0.1 in 는 위 좌석 치수가 내경 3.70 m 안에 들어가도록 역산한 값(공식 아님).
-   기수 1.16D · 꼬리 중첩 1.11D · 후방 모듈 3.0 m(도어 앞쪽) · 오버윙 인접 2열 · 출구열 추가 피치 2.5 in 는 비객실 길이 10.06 m(=37.57−27.51)와 도어 4곳에 맞춘 값. */
-const A320_CAL = { seatIn: 18, armIn: 2, aisleIn: 19, clrIn: 0.1, shellIn: 4.9, floorK: 0.16, noseK: 1.16, overlapK: 1.11,
-                   aftLen: 3.0, aftFront: true, owX: 14.43, owGap: 0, exitAuto: false, exitIn: 2.5 };
+   도어 폭 0.81 m(32 in, 'IP': Airbus 훈련 자료 1.829×0.813 m · Aerospaceweb 1.85×0.81 m · GlobalAir 6 ft 1 in × 2 ft 8 in 세 곳 일치; 출구 상한은 Type I 45석 유지).
+   기수 1.135D · 꼬리 중첩 1.09D · 후방 모듈 3.03 m(도어 앞쪽) · 오버윙 인접 2열 · 출구열 추가 피치 2.5 in 는 비객실 길이 10.06 m(=37.57−27.51)와 도어 4곳에 맞춘 값. */
+const A320_CAL = { seatIn: 18, armIn: 2, aisleIn: 19, clrIn: 0.1, shellIn: 4.9, floorK: 0.16, noseK: 1.135, overlapK: 1.09,
+                   aftLen: 3.03, aftFront: true, owX: 14.43, owGap: 0, exitAuto: false, exitIn: 2.5, doorI: 'IP' };
 const A320W_CAL = Object.assign({}, A320_CAL, { seatIn: 17, aisleIn: 25 });
 /* A321: 동체 단면은 A320과 같음(공식 페이지). 도어 위치·후방 모듈은 공식 값을 확인하지 못해 기본 구성 */
-const A321_CAL = { seatIn: 18, armIn: 2, aisleIn: 19, clrIn: 0.1, shellIn: 4.9, floorK: 0.16, noseK: 1.16, overlapK: 1.11 };
+const A321_CAL = { seatIn: 18, armIn: 2, aisleIn: 19, clrIn: 0.1, shellIn: 4.9, floorK: 0.16, noseK: 1.135, overlapK: 1.09, doorI: 'IP' };
 /* A330-300 (Airbus A330 Aircraft Characteristics 도면 발췌, 사용자 제공):
    단면 FIGURE-2-5-0-991-001-A01: 이코노미 8열 = 2석 유닛 42 in · 4석 유닛 82 in · 통로 18/19 in · 합계 204 in(5.18 m)
    → 2s+3a=42, 4s+5a=82 에서 좌석 18 in · 팔걸이 2 in, 통로 평균 19 in(합계 204 in 기준).
@@ -266,15 +267,15 @@ const A350_CAL = Object.assign({ clrIn: 4.1, shellIn: 4.5, overlapK: 0.86, aftLe
 /* A350-900 개정 전 객실(221 in = 5.61 m, 외경 5.96 m, 전장 66.61 m): 쉘 (5.96−5.61)/2 = 6.9 in */
 const A350_OLD_CAL = Object.assign({ clrIn: 2.0, shellIn: 6.9, overlapK: 0.87, aftLen: 5.12, aspect: 1.022 }, A350_BASE);
 const CAL_KEYS = ['seatIn', 'armIn', 'aisleIn', 'clrIn', 'shellIn', 'floorK', 'aspect', 'noseK', 'tailK', 'overlapK',
-                  'aftLen', 'aftFront', 'owX', 'owGap', 'exitAuto', 'exitIn', 'pitchIn', 'lavPer', 'doorPlan'];
+                  'aftLen', 'aftFront', 'owX', 'owGap', 'exitAuto', 'exitIn', 'pitchIn', 'lavPer', 'doorPlan', 'doorI'];
 const A320_DOORS = [5.04, 14.43, 15.28, 29.53];
 const PRESETS = [
   { id: 'A320', name: 'A320ceo', body: 'narrow', layout: '3-3', L: 37.57, Lcab: 27.51, Do: 3.95, Wcab: 3.70, cal: A320_CAL, doors: A320_DOORS,
     note: 'Airbus 도면 “6 ABREAST-WIDER SEAT” 치수(좌석 18 in · 팔걸이 2 in · 통로 19 in · 합계 143 in)와 도어 위치(5.04/14.43/15.28/29.53 m)를 그대로 썼습니다. 바닥 위치 16%와 측벽 여유 0.1 in는 이 치수가 내경 3.70 m에 들어가도록 역산한 값입니다.' },
   { id: 'A320w', name: 'A320 와이더 통로', body: 'narrow', layout: '3-3', L: 37.57, Lcab: 27.51, Do: 3.95, Wcab: 3.70, cal: A320W_CAL, doors: A320_DOORS,
     note: 'Airbus 도면 “6 ABREAST-WIDER AISLE”: 좌석 17 in(3연석 59 in) · 통로 25 in · 합계 143 in. 나머지는 A320과 같습니다.' },
-  { id: 'A321', name: 'A321ceo', body: 'narrow', layout: '3-3', L: 44.51, Lcab: null, Do: 3.95, Wcab: 3.70, cal: A321_CAL,
-    note: '동체 단면이 A320과 같아 같은 단면 치수를 쓰고, 전방 도어 위치 기수 비율도 A320 값을 가정했습니다. A321의 도어 위치·객실 길이는 확인하지 못했습니다.' },
+  { id: 'A321', name: 'A321ceo', body: 'narrow', layout: '3-3', L: 44.51, Lcab: 34.44, Do: 3.95, Wcab: 3.70, cal: A321_CAL,
+    note: '동체 단면이 A320과 같아(공식 페이지 3.95/3.70 m) 같은 단면 치수와 도어 폭 0.81 m를 썼습니다. 객실 길이 34.44 m는 Airbus 제품 페이지 값이고, 전장과 합친 비객실 길이 10.07 m가 A320(10.06 m)과 같아 A320의 기수·꼬리 비율을 그대로 씁니다. A321의 도어 위치(4쌍)·평면 배치는 도면이 없어 확인하지 못했고 자동 출구 구성입니다. 공식 좌석 수(표준 단일 클래스 185석, 최대 220석)는 모델 승객 수와 비교하는 참고값일 뿐입니다.' },
   { id: 'A330', name: 'A330-300', body: 'wide', layout: '2-4-2', L: 63.66, Lcab: 50.36, Do: 5.64, Wcab: 5.26, cal: A330_CAL,
     doors: [5.85, 17.74, 35.96, 50.96], doorNames: ['도어 1 (전방)', '도어 2 (중앙)', '도어 3 (비상구)', '도어 4 (후방)'],
     note: 'Airbus A330 도면 기준: 이코노미 8열 좌석 18 in · 팔걸이 2 in · 통로 평균 19 in(합계 204 in), 도어 4쌍(5.85 · 17.74 · 35.96 · 50.96 m, 중앙·후방 Type A 1.07 m, 비상구 도어 3 은 0.81 m = Type B 32 in 와 일치, 도어 1 은 도면에 없어 Type A 가정), 꼬리 원추 1.99D, 대표 구성 피치 32 in · 화장실 1/33명. 도어 위치 고정은 약 33행(264석) 이상에서 적용되고 그보다 작으면 자동 출구 구성을 씁니다.' },
@@ -293,14 +294,14 @@ const DEF = {
   pax: 180, rows: 30, fuseL: 37.57, fuseD: 3.95, autoLayout: true,
   pitchIn: 31, seatIn: 18, armIn: 2, aisleIn: 19, clrIn: 0.1, shellIn: 4.9,
   floorK: 0.16, aspect: 1.0,
-  noseK: 1.16, tailK: 2.5, overlapK: 1.11,
-  fwdLen: 2.0, aftLen: 3.0, midLen: 2.0, bayLen: 1.2,
+  noseK: 1.135, tailK: 2.5, overlapK: 1.09,
+  fwdLen: 2.0, aftLen: 3.03, midLen: 2.0, bayLen: 1.2,
   lavPer: 50, exitAuto: false, exitIn: 2.5, wingPos: 0.38,
-  owX: 0, owGap: 0, aftFront: true, doorPlan: null
+  owX: 0, owGap: 0, aftFront: true, doorPlan: null, doorI: 'IP'
 };
 /* 요구 규칙의 원래 기본값 (A320 도면과 다른 항목만) — "원래 규칙 기본값 적용" 버튼용 */
 const RULE_DEF = { clrIn: 3.5, shellIn: 6, floorK: 0.10, noseK: 1.4, tailK: 2.5, overlapK: 1.4, aftLen: 2.5, aftFront: false,
-                   exitAuto: true, exitIn: 10, wingPos: 0.42, owX: 0, owGap: 1, seatIn: 18, armIn: 2, pitchIn: 31, lavPer: 50, doorPlan: null };
+                   exitAuto: true, exitIn: 10, wingPos: 0.42, owX: 0, owGap: 1, seatIn: 18, armIn: 2, pitchIn: 31, lavPer: 50, doorPlan: null, doorI: 'I' };
 let P = Object.assign({}, DEF), activePreset = null, RES = null;
 
 /* ---------------------------------------------------------------------
@@ -388,7 +389,7 @@ function build(rows, X, P, tier, slack, extraMid, slackAt) {
   extraMid = extraMid || 0;
   const ab = X.ab, pax = rows * ab, pitch = P.pitchIn * IN, depth = Math.min(0.5, 0.62 * pitch);
   const extra = exitExtraM(P, X.layout);
-  const dt = tier === 4 ? 'A' : 'I', vest = vestLen(dt);
+  const dt = tier === 4 ? 'A' : (P.doorI || 'I'), vest = vestLen(dt);
   const plan = planOf(P), Do_ = P.mode === 'fuse' ? P.fuseD : X.Do, Ln_ = noseLen(P, Do_);
   const fwdLen = plan ? Math.max(P.fwdLen, vestLen(plan[0].t) + 0.4) : P.fwdLen;
   let planBays = null;
@@ -1050,7 +1051,7 @@ function updatePanels() {
   $('#kLDD').textContent = `객실 길이/폭 ${f2(c.L / X.W, 1)}`;
   const upg = c.upgraded ? ' (보강)' : '';
   const nDoor = c.exits.filter(e => e.kind === 'door').length, nOw = c.exits.filter(e => e.kind === 'ow').length;
-  const tierName = c.plan ? `도어 ${nDoor}쌍 (${c.exits.map(e => TYPE[e.type].sh).join('·')}) · 도면 위치` : `${TYPE[c.doorType].nm} ${nDoor}쌍` + (nOw ? ` + 오버윙 III ${nOw}쌍` : '');
+  const tierName = c.plan ? `도어 ${nDoor}쌍 (${c.exits.map(e => TYPE[e.type].sh).join('·')}) · 도면 위치` : `Type ${TYPE[c.doorType].sh} ${nDoor}쌍` + (nOw ? ` + 오버윙 III ${nOw}쌍` : '');
   $('#chips').innerHTML = [
     ['객실 길이', f2(c.L) + ' m'], ['행 수', R.rows], ['화장실', c.nLav], ['갤리', c.nGal],
     ['출구', `${c.exits.length}쌍 · ${tierName}${upg}`], ['출구 용량', c.capacity + '석'], ['최대 출구 간격', f2(c.gapMax, 1) + ' m'],
