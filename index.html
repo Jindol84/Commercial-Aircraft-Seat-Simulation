@@ -125,6 +125,7 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
     <div id="slAdv"></div>
     <label class="chk"><input type="checkbox" id="exitAuto"> 출구열 추가 피치 자동 (25.813(c) 근사)</label>
     <label class="chk"><input type="checkbox" id="aftFront"> 후방 도어를 후방 모듈 앞쪽에 배치 (도어 뒤에 갤리·화장실)</label>
+    <div id="planInfo" class="small" style="display:none;margin:0 0 10px"><b style="color:var(--acc)">도어 위치 고정</b> <span id="planTxt"></span> <a href="#" id="planClear" style="color:var(--acc)">해제</a></div>
     <div id="slAdv2"></div>
   </details>
 
@@ -175,7 +176,8 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
         <li><b>기본값 변경 내역(A320 기준)</b>: 측벽 여유 3.5→0.1 in · 쉘 6→4.9 in · 바닥 위치 10→16% · 기수 1.4→1.16D · 꼬리 중첩 1.4→1.11D · 후방 모듈 2.5→3.0 m(도어 앞쪽) · 오버윙 두 출구 인접 열 · 출구열 추가 피치 +10 in→2.5 in(A320 오버윙 출구 간격 0.85 m 반영) · 윙 위치 42→38% · 단일통로 20→19 in(원래 규칙값이자 A320 도면 값). 좌석 18 in · 팔걸이 2 in · 피치 31 in는 그대로입니다. 광동체 기본값은 통로 20 in · 쉘 6 in를 씁니다.</li>
         <li><b>A320 프리셋 (Airbus 도면 기준)</b>: 사용자가 제공한 <a href="https://www.aircraft.airbus.com/sites/g/files/jlcbta126/files/2025-01/AC_A320_0624.pdf">A320 Aircraft Characteristics</a> 발췌 도면을 그대로 썼습니다. 6열 단면: 와이더 시트 = 좌석 18 in · 3연석 62 in · 통로 19 in · 합계 143 in(3.63 m), 와이더 통로 = 좌석 17 in · 3연석 59 in · 통로 25 in · 합계 143 in. 3연석 폭이 3×좌석+4×2 in와 정확히 같아 <b>좌석 폭은 팔걸이 사이 쿠션 폭, 팔걸이는 2 in(공유)</b>로 읽힙니다(도면 산술에서 도출). 도어 위치 도면(FIGURE-2-7-0-991-003-A01): 기수에서 전방 도어 5.04 m · 오버윙 출구 14.43/15.28 m · 후방 도어 29.53 m (도어 중심선으로 읽음). 이전 버전의 “18 in 좌석 = 팔걸이 포함 모듈” 해석은 이 도면으로 <b>틀린 것이 확인되어 철회</b>했습니다(그 해석은 바닥 위치 10% 가정에서 나온 착시였습니다).</li>
         <li><b>역산·가정 값</b>: 바닥 위치 16%와 측벽 여유 0.1 in는 위 좌석 치수(143 in)가 내경 3.70 m 안에 들어가도록 역산한 값이며 공식 값이 아닙니다. 기수 1.16D · 꼬리 중첩 1.11D · 후방 모듈 3.0 m(도어 앞쪽) · 오버윙 출구 인접 2열 · 출구열 추가 피치 2.5 in는 비객실 길이 10.06 m와 도어 4곳(전방 5.04 · 오버윙 14.43/15.28 · 후방 29.53 m)에 맞춘 값입니다. 오버윙 두 출구가 0.85 m(인접 열) 간격이라 규칙의 “출구열 +10 in”는 A320 실제보다 큽니다. 도면에는 하단 화물칸 위치·치수와 4열 퍼스트 클래스(좌석 22.6 in · 통로 27 in) 도면도 있었으나 이코노미 단일 클래스 모델이라 쓰지 않았습니다.</li>
-        <li><b>A321·광동체</b>: A321은 단면이 A320과 같아 같은 단면 치수와 전방 도어 위치 비율을 쓰고 도어·객실 길이는 확인하지 못했습니다. A330-300·A350-900은 A320 도면에서 얻은 기하 가정(팔걸이 2 in · 여유 0.1 in · 바닥 16% · 통로 19 in)을 공통으로 쓰고, 쉘은 (외경−최대 객실 폭)/2, 좌석 폭과 꼬리 중첩은 공식 외경·내경·비객실 길이에서 역산했습니다. 그 결과 좌석 폭은 A330 18.0 · A350 17.7 · A350 개정 전 17.3 in로, Airbus 공개 값(A350 9열 18 in · 확대 객실 최대 18.7 in)보다 작고 항공사 보고(SAS 17.3 in · Air India 17.5 in)에 가깝습니다. 광동체의 좌석 폭·통로 폭은 모델 의존적이며 공식 값이 아닙니다.</li>
+        <li><b>A330-300 (Airbus 도면 기준)</b>: 사용자가 제공한 A330 Aircraft Characteristics 발췌 도면을 썼습니다. 이코노미 8열 단면: 2석 유닛 42 in · 4석 유닛 82 in · 통로 18/19 in · 합계 204 in(5.18 m) → 연립방정식으로 <b>좌석 18 in · 팔걸이 2 in</b>(A320과 같은 구조), 통로 평균 19 in. 도어(기수에서, 중심선으로 읽음): 5.85 · 17.74 · 35.96 · 50.96 m, 중앙·후방 도어 폭 1.07 m(Type A 42 in), 비상구 도어 3 폭 0.81 m(<a href="https://www.ecfr.gov/current/title-14/chapter-I/subchapter-C/part-25/subpart-D/subject-group-ECFR88992669bab3b52/section-25.807">Type B 32 in</a>와 일치 — 도면에 종류 표기는 없어 폭으로 판단), 도어 1은 도면에 없어 Type A 가정. 꼬리 원추 시작 52.43 m → 꼬리 1.99D. 대표 구성(300석: 비즈니스 36 + 이코노미 264, 8열 32 in 피치, 갤리 6 · 화장실 9)에서 피치 32 in · 화장실 1/33명. 도어 위치 고정은 약 33행 이상에서 적용되며, 그보다 작으면 자동 출구 구성을 씁니다. 바닥 위치 16%·측벽 여유 0.1 in는 A320 도면에서 역산한 가정입니다.</li>
+        <li><b>A321·A350</b>: A321은 단면이 A320과 같아 같은 단면 치수와 전방 도어 위치 비율을 쓰고 도어·객실 길이는 확인하지 못했습니다. A350-900은 A320 도면 기하 가정(팔걸이 2 in · 여유 0.1 in · 바닥 16% · 통로 19 in)에 쉘 (외경−최대 객실 폭)/2, 좌석 폭과 꼬리 중첩을 공식 외경·내경·비객실 길이에서 역산해 17.7 in(개정 전 17.3 in)입니다. Airbus 공개 값(9열 18 in · 확대 객실 최대 18.7 in)보다 작고 항공사 보고(SAS 17.3 in · Air India 17.5 in)에 가까워 A350의 좌석·통로 폭은 모델 의존적이며 공식 값이 아닙니다.</li>
         <li><b>첨부 보고서 교차검증</b>: 두 출처 이상에서 일치한 값만 사용했습니다 — A320 외경 3.95·객실 3.70 m·좌석 18 in·통로 19 in(Airbus 도면·페이지 + 보고서의 19~20 in), A350 외경 5.96 m(Airbus 팩트시트)·좌석 18 in(Airbus 기사), FAR 25.815 통로 20/15 in(eCFR). <b>A350 객실 폭은 보고서 5.61 m(221 in)가 2022년 확대 이전 값</b>이고 Airbus 현행은 5.71 m(225 in)입니다(Airbus 기사·<a href="https://www.insideflyer.com/posts/airbus-a350-cabin-design-elevates-long-haul-comfort/">Inside Flyer</a>와 대조). A330·A350의 통로 폭은 A320 외 공식 값을 찾지 못했습니다. 보고서의 B737·A220·B787·B777은 보고서 외 출처를 확인하지 못했고 전장·객실 길이가 없어 프리셋에 넣지 않았습니다.</li>
         <li><b>출구 체계</b>: ≤100석 Type I 2쌍 · 101~180석 Type I 2쌍 + 오버윙 Type III 2쌍 · 181~360석 Type I 4쌍 · 361석 이상 Type A 4쌍(확장). 60 ft 간격 위반 시 자동 보강합니다. 각 출구 상한의 합산 방식은 해석이므로 원문을 확인하세요.</li>
         <li><b>Type III 접근 통로</b>는 “출구열 추가 피치”를 통로 폭의 대리 지표로 쓰는 근사입니다 (3석 측 6 in×2 대안 = 12 in).</li>
@@ -214,7 +216,7 @@ const parse = s => s.split('-').map(Number);
 const FONT = '"Pretendard","Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif';
 
 /* 출구 종류: 개구부 w×h (in), 개소당 좌석 상한 — 14 CFR 25.807(a),(g) */
-const TYPE = { A: { w: 42, h: 72, cap: 110, nm: 'Type A' }, I: { w: 24, h: 48, cap: 45, nm: 'Type I' }, III: { w: 20, h: 36, cap: 35, nm: 'Type III' } };
+const TYPE = { A: { w: 42, h: 72, cap: 110, nm: 'Type A' }, B: { w: 32, h: 72, cap: 75, nm: 'Type B' }, I: { w: 24, h: 48, cap: 45, nm: 'Type I' }, III: { w: 20, h: 36, cap: 35, nm: 'Type III' } };
 const doorW = t => TYPE[t].w * IN;
 const vestLen = t => doorW(t) + 0.3;                   // 도어 앞 베스티뷸 길이
 const LAYOUTS = { narrow: ['2-2', '3-2', '3-3'], wide: ['2-3-2', '2-4-2', '3-3-3', '3-4-3'] };
@@ -239,12 +241,21 @@ const A321_CAL = { seatIn: 18, armIn: 2, aisleIn: 19, clrIn: 0.1, shellIn: 4.9, 
 /* 광동체: A320 도면에서 얻은 기하 가정(팔걸이 2 in · 여유 0.1 in · 바닥 16% · 통로 19 in)을 공통으로 쓰고,
    쉘은 (외경−최대 객실 폭)/2, 좌석 폭과 꼬리 중첩은 공식 외경·내경·비객실 길이에서 역산. 통로 19 in 는 A320 값을 가정한 것. */
 const WIDE_COMMON = { armIn: 2, aisleIn: 19, clrIn: 0.1, floorK: 0.16, noseK: 1.4 };
-const A330_CAL = Object.assign({ seatIn: 18, shellIn: 7.5, overlapK: 1.54 }, WIDE_COMMON);
+/* A330-300 (Airbus A330 Aircraft Characteristics 도면 발췌, 사용자 제공):
+   단면 FIGURE-2-5-0-991-001-A01: 이코노미 8열 = 2석 유닛 42 in · 4석 유닛 82 in · 통로 18/19 in · 합계 204 in(5.18 m)
+   → 2s+3a=42, 4s+5a=82 에서 좌석 18 in · 팔걸이 2 in, 통로 평균 19 in(합계 204 in 기준).
+   도어 위치(기수에서, 중심선으로 읽음) FIGURE-2-7-0-991-006-B01: 5.85 / 17.74 / 35.96 / 50.96 m.
+   도어 폭 FIGURE-2-7-0-991-014/015/016: 중앙·후방 1.07 m(= Type A 42 in), 비상구 도어 3 은 0.81 m(= Type B 32 in 와 일치), 도어 1 은 도면에 없어 Type A 로 가정.
+   꼬리 원추 시작 52.43 m(FIGURE-2-2-0-991-001-A01) → 꼬리 11.23 m = 1.99D, 평면 배치 FIGURE-2-4-1-991-001-A01(300석: 비즈니스 36 + 이코노미 264, 8열 32 in 피치, 화장실 9) → 피치 32 in · 화장실 1/33명(대표 구성 한 건 기준).
+   기수는 도어 1 위치에서 결정(0.92D), 꼬리 중첩 0.55D 는 비객실 길이 13.30 m(=63.66−50.36)에 맞춘 값, 후방 모듈 5.26 m(도어 앞쪽)는 후방 도어 50.96 m 에 맞춘 값. 바닥 위치 16%·측벽 여유 0.1 in 는 A320 도면 역산 가정. */
+const A330_PLAN = [{ x: 5.85, t: 'A' }, { x: 17.74, t: 'A' }, { x: 35.96, t: 'B' }, { x: 50.96, t: 'A' }];
+const A330_CAL = { seatIn: 18, armIn: 2, aisleIn: 19, clrIn: 0.1, shellIn: 7.5, floorK: 0.16, noseK: 0.92, tailK: 1.99, overlapK: 0.55,
+                   aftLen: 5.26, aftFront: true, pitchIn: 32, lavPer: 33, doorPlan: A330_PLAN };
 const A350_CAL = Object.assign({ seatIn: 17.7, shellIn: 4.5, overlapK: 1.25 }, WIDE_COMMON);
 /* A350-900 개정 전 객실(221 in = 5.61 m, 외경 5.96 m): 2022년 확대 이전 값. 쉘 (5.96−5.61)/2 = 6.9 in */
 const A350_OLD_CAL = Object.assign({ seatIn: 17.3, shellIn: 6.9, overlapK: 1.25 }, WIDE_COMMON);
 const CAL_KEYS = ['seatIn', 'armIn', 'aisleIn', 'clrIn', 'shellIn', 'floorK', 'aspect', 'noseK', 'tailK', 'overlapK',
-                  'aftLen', 'aftFront', 'owX', 'owGap', 'exitAuto', 'exitIn'];
+                  'aftLen', 'aftFront', 'owX', 'owGap', 'exitAuto', 'exitIn', 'pitchIn', 'lavPer', 'doorPlan'];
 const A320_DOORS = [5.04, 14.43, 15.28, 29.53];
 const PRESETS = [
   { id: 'A320', name: 'A320ceo', body: 'narrow', layout: '3-3', L: 37.57, Lcab: 27.51, Do: 3.95, Wcab: 3.70, cal: A320_CAL, doors: A320_DOORS,
@@ -254,7 +265,8 @@ const PRESETS = [
   { id: 'A321', name: 'A321ceo', body: 'narrow', layout: '3-3', L: 44.51, Lcab: null, Do: 3.95, Wcab: 3.70, cal: A321_CAL,
     note: '동체 단면이 A320과 같아 같은 단면 치수를 쓰고, 전방 도어 위치 기수 비율도 A320 값을 가정했습니다. A321의 도어 위치·객실 길이는 확인하지 못했습니다.' },
   { id: 'A330', name: 'A330-300', body: 'wide', layout: '2-4-2', L: 63.66, Lcab: 50.36, Do: 5.64, Wcab: 5.26, cal: A330_CAL,
-    note: '2-4-2는 Airbus A330 소개 페이지의 일반 이코노미 배열입니다. 좌석 폭은 A320 도면에서 얻은 기하 가정(팔걸이 2 in · 여유 0.1 in · 바닥 16% · 통로 19 in)으로 역산한 18.0 in이며, A330 자체의 공식 좌석·통로 값은 확인하지 못했습니다(검색된 항공사 값은 17.3~18 in).' },
+    doors: [5.85, 17.74, 35.96, 50.96], doorNames: ['도어 1 (전방)', '도어 2 (중앙)', '도어 3 (비상구)', '도어 4 (후방)'],
+    note: 'Airbus A330 도면 기준: 이코노미 8열 좌석 18 in · 팔걸이 2 in · 통로 평균 19 in(합계 204 in), 도어 4쌍(5.85 · 17.74 · 35.96 · 50.96 m, 중앙·후방 Type A 1.07 m, 비상구 도어 3 은 0.81 m = Type B 32 in 와 일치, 도어 1 은 도면에 없어 Type A 가정), 꼬리 원추 1.99D, 대표 구성 피치 32 in · 화장실 1/33명. 도어 위치 고정은 약 33행(264석) 이상에서 적용되고 그보다 작으면 자동 출구 구성을 씁니다.' },
   { id: 'A350', name: 'A350-900', body: 'wide', layout: '3-3-3', L: 66.80, Lcab: 51.04, Do: 5.94, Wcab: 5.71, cal: A350_CAL,
     note: '좌석 17.7 in는 A320 도면 기하 가정으로 역산한 값이라 Airbus 공개 값(9열 18 in, 확대 객실 최대 18.7 in)보다 작고, 항공사 보고(SAS 17.3 in · Air India 17.5 in)에 가깝습니다. 외경은 제품 페이지 5.94 m(팩트시트 5.96 m)를 썼고, 첨부 보고서의 객실 폭 5.61 m는 확대 이전 값이라 “A350-900 개정 전”에 따로 넣었습니다.' },
   { id: 'A350o', name: 'A350-900 개정 전', body: 'wide', layout: '3-3-3', L: 66.80, Lcab: null, Do: 5.96, Wcab: 5.61, cal: A350_OLD_CAL,
@@ -271,11 +283,11 @@ const DEF = {
   noseK: 1.16, tailK: 2.5, overlapK: 1.11,
   fwdLen: 2.0, aftLen: 3.0, midLen: 2.0, bayLen: 1.2,
   lavPer: 50, exitAuto: false, exitIn: 2.5, wingPos: 0.38,
-  owX: 0, owGap: 0, aftFront: true
+  owX: 0, owGap: 0, aftFront: true, doorPlan: null
 };
 /* 요구 규칙의 원래 기본값 (A320 도면과 다른 항목만) — "원래 규칙 기본값 적용" 버튼용 */
 const RULE_DEF = { clrIn: 3.5, shellIn: 6, floorK: 0.10, noseK: 1.4, tailK: 2.5, overlapK: 1.4, aftLen: 2.5, aftFront: false,
-                   exitAuto: true, exitIn: 10, wingPos: 0.42, owX: 0, owGap: 1, seatIn: 18, armIn: 2, pitchIn: 31 };
+                   exitAuto: true, exitIn: 10, wingPos: 0.42, owX: 0, owGap: 1, seatIn: 18, armIn: 2, pitchIn: 31, lavPer: 50, doorPlan: null };
 let P = Object.assign({}, DEF), activePreset = null, RES = null;
 
 /* ---------------------------------------------------------------------
@@ -354,22 +366,41 @@ function cellsFor(x0, x1, nLav, nGal, X) {
   return cells;
 }
 
+/* 도어 계획(doorPlan): 프리셋이 공식 도면의 도어 위치(기수에서 중심선, m)와 종류를 지정. 첫 도어=전방, 마지막=후방, 사이=중앙 서비스 모듈.
+   이 경우 기수 길이는 첫 도어 위치에서 결정되고(= x1 − 베스티뷸/2), 중앙 도어는 절대 위치에 맞춰 구간 내 행 간격을 미세 조정한다. */
+const planOf = P => (P.doorPlan && P.doorPlan.length >= 3) ? P.doorPlan : null;
+function noseLen(P, Do) { const pl = planOf(P); return pl ? pl[0].x - vestLen(pl[0].t) / 2 : P.noseK * Do; }
+
 function build(rows, X, P, tier, slack, extraMid, slackAt) {
   extraMid = extraMid || 0;
   const ab = X.ab, pax = rows * ab, pitch = P.pitchIn * IN, depth = Math.min(0.5, 0.62 * pitch);
   const extra = exitExtraM(P, X.layout);
   const dt = tier === 4 ? 'A' : 'I', vest = vestLen(dt);
+  const plan = planOf(P), Do_ = P.mode === 'fuse' ? P.fuseD : X.Do, Ln_ = noseLen(P, Do_);
+  const fwdLen = plan ? Math.max(P.fwdLen, vestLen(plan[0].t) + 0.4) : P.fwdLen;
+  let planBays = null;
+  if (plan) {                                             // 중앙 도어를 절대 위치에: 가장 가까운 행 수로 놓고 남는 오차는 구간 내 행 간격에 분산
+    let sCur = fwdLen, rCur = 0, ok = true; planBays = [];
+    for (let j = 1; j < plan.length - 1; j++) {
+      const t = plan[j].t, vj = vestLen(t), len = Math.max(P.midLen, vj + 0.4);
+      const availLen = (plan[j].x - Ln_) - vj / 2 - sCur, k = Math.round(availLen / pitch);
+      if (k < 1 || rCur + k > rows - 1) { ok = false; break; }
+      const eps = (availLen - k * pitch) / k;
+      planBays.push({ after: rCur + k, svc: true, door: true, dt: t, vj, len, eps, from: rCur + 1, k });
+      sCur += k * (pitch + eps) + len; rCur += k;
+    }
+    if (!ok) planBays = null;                             // 행 수 부족 → 자동 구성으로 대체
+  }
   const rW = clamp(Math.round(P.wingPos * rows), 1, Math.max(1, rows));
   const exitRows = new Set(); let r1 = null, r2 = null;
-  if (tier === 2 && rows >= 3) {                          // 오버윙 Type III 2쌍: owX>0 이면 첫 출구를 기수에서 owX m 부근 열에, 아니면 윙 위치 비율 기준
-    const Ln_ = P.noseK * (P.mode === 'fuse' ? P.fuseD : X.Do);
+  if (!planBays && tier === 2 && rows >= 3) {             // 오버윙 Type III 2쌍: owX>0 이면 첫 출구를 기수에서 owX m 부근 열에, 아니면 윙 위치 비율 기준
     r1 = P.owX > 0 ? Math.round((P.owX - Ln_ - P.fwdLen - depth - (pitch + extra - depth) / 2) / pitch) + 1 : rW - Math.floor((P.owGap + 1) / 2);
     r1 = clamp(r1, 1, rows); r2 = clamp(r1 + P.owGap + 1, 1, rows);
     exitRows.add(r1); exitRows.add(r2);
   }
   /* 중앙 서비스 모듈: 150명 초과 시 ceil(pax/150)-1 개 (최대 3). 3·4단계는 중앙 도어 2쌍 이상 */
   const nSvc = Math.min(3, Math.max(0, Math.ceil(pax / 150) - 1));
-  const m = rows < 4 ? 0 : (tier >= 3 ? Math.max(2 + extraMid, nSvc) : nSvc);
+  const m = (planBays || rows < 4) ? 0 : (tier >= 3 ? Math.max(2 + extraMid, nSvc) : nSvc);
   const bays = [], used = new Set();
   for (let j = 1; j <= m; j++) {
     let after = Math.round(rows * j / (m + 1));
@@ -379,25 +410,27 @@ function build(rows, X, P, tier, slack, extraMid, slackAt) {
     if (used.has(after)) continue;
     used.add(after); bays.push({ after, svc: j <= nSvc, door: tier >= 3 });
   }
+  if (planBays) planBays.forEach(b => bays.push(b));
   bays.sort((a, b) => a.after - b.after);
 
   const mods = [], rowsArr = [];
-  let s = P.fwdLen, slackIv = null;
+  let s = fwdLen, slackIv = null;
   const spread = slackAt && slackAt.spread && rows > 0 ? slack / rows : 0;
   const useSlack = slack > 0.01 && !spread, at = slackAt || { after: rows, beforeBay: false };
   const putSlack = () => { slackIv = [s, s + slack]; s += slack; };
-  const fwd = { kind: 'fwd', s0: 0, s1: P.fwdLen }; mods.push(fwd);
+  const fwd = { kind: 'fwd', s0: 0, s1: fwdLen, dt: plan && planBays ? plan[0].t : dt }; mods.push(fwd);
   if (useSlack && at.after === 0) putSlack();
   for (let r = 1; r <= rows; r++) {
-    const ex = exitRows.has(r), alloc = pitch + spread + (ex ? extra : 0);
+    const pe = planBays ? planBays.find(b => r >= b.from && r < b.from + b.k) : null;
+    const ex = exitRows.has(r), alloc = pitch + spread + (ex ? extra : 0) + (pe ? pe.eps : 0);
     rowsArr.push({ n: r, s0: s, s1: s + alloc, depth, exit: ex, alloc }); s += alloc;
     if (useSlack && at.after === r && at.beforeBay) putSlack();
     const b = bays.find(b => b.after === r);
-    if (b) { const len = b.svc ? P.midLen : Math.max(P.bayLen, vest); b.s0 = s; b.s1 = s + len; b.kind = b.svc ? 'mid' : 'bay'; s += len; mods.push(b); }
+    if (b) { const len = b.len || (b.svc ? P.midLen : Math.max(P.bayLen, vest)); b.s0 = s; b.s1 = s + len; b.kind = b.svc ? 'mid' : 'bay'; s += len; mods.push(b); }
     if (useSlack && at.after === r && !at.beforeBay) putSlack();
   }
   const seatEnd = s;
-  const aft = { kind: 'aft', s0: s, s1: s + P.aftLen }; s += P.aftLen; mods.push(aft);
+  const aft = { kind: 'aft', s0: s, s1: s + P.aftLen, dt: planBays ? plan[plan.length - 1].t : dt }; s += P.aftLen; mods.push(aft);
   const L = s;
 
   /* 화장실·갤리 배분 */
@@ -408,18 +441,19 @@ function build(rows, X, P, tier, slack, extraMid, slackAt) {
   mid.forEach((x, i) => { x.lav = Math.floor(rest / mid.length) + (i < rest % mid.length ? 1 : 0); });
   mods.forEach(x => { x.gal = (x.kind === 'bay') ? 0 : 1; if (x.kind === 'bay') x.lav = 0; });
   /* 도어 베스티뷸과 셀 영역 */
-  fwd.vest = [0, vest]; fwd.cx = [vest, fwd.s1];
-  if (P.aftFront) { aft.vest = [aft.s0, aft.s0 + vest]; aft.cx = [aft.s0 + vest, aft.s1]; }   // 도어 뒤에 갤리·화장실
-  else { aft.vest = [aft.s1 - vest, aft.s1]; aft.cx = [aft.s0, aft.s1 - vest]; }
+  const vF = planBays ? vestLen(plan[0].t) : vest, vA = planBays ? vestLen(plan[plan.length - 1].t) : vest;
+  fwd.vest = [0, vF]; fwd.cx = [vF, fwd.s1];
+  if (P.aftFront) { aft.vest = [aft.s0, aft.s0 + vA]; aft.cx = [aft.s0 + vA, aft.s1]; }   // 도어 뒤에 갤리·화장실
+  else { aft.vest = [aft.s1 - vA, aft.s1]; aft.cx = [aft.s0, aft.s1 - vA]; }
   mods.forEach(x => {
-    if (x.kind === 'mid') { if (x.door) { x.vest = [x.s0, x.s0 + vest]; x.cx = [x.s0 + vest, x.s1]; } else x.cx = [x.s0, x.s1]; }
+    if (x.kind === 'mid') { if (x.door) { const vb = x.vj || vest; x.vest = [x.s0, x.s0 + vb]; x.cx = [x.s0 + vb, x.s1]; } else x.cx = [x.s0, x.s1]; }
     if (x.kind === 'bay') { x.vest = [x.s0, x.s1]; }
     x.cells = x.cx ? cellsFor(x.cx[0], x.cx[1], x.lav, x.gal, X) : [];
   });
 
   /* 출구 목록 (좌우 1쌍씩) */
   const exits = [];
-  mods.forEach(x => { if (x.vest) exits.push({ kind: 'door', type: dt, s: (x.vest[0] + x.vest[1]) / 2, mod: x.kind }); });
+  mods.forEach(x => { if (x.vest) exits.push({ kind: 'door', type: x.dt || dt, s: (x.vest[0] + x.vest[1]) / 2, mod: x.kind }); });
   exitRows.forEach(r => { const rw = rowsArr[r - 1]; exits.push({ kind: 'ow', type: 'III', s: rw.s0 + rw.depth + (rw.alloc - rw.depth) / 2, row: r }); });
   exits.sort((a, b) => a.s - b.s);
   let gapMax = 0;
@@ -427,12 +461,12 @@ function build(rows, X, P, tier, slack, extraMid, slackAt) {
   const cnt = t => exits.filter(e => e.type === t).length * 2;                       // 양측 합
   const n3 = cnt('III'), close3 = exitRows.size === 2 && P.owGap < 3;               // 두 출구가 3열 미만 간격 → 합계 65석
   const cap3 = n3 ? Math.min(n3 * TYPE.III.cap, close3 ? 65 : 70) : 0;
-  const capacity = cnt('I') * TYPE.I.cap + cnt('A') * TYPE.A.cap + cap3;
+  const capacity = cnt('I') * TYPE.I.cap + cnt('A') * TYPE.A.cap + cnt('B') * TYPE.B.cap + cap3;
   const wRow = r1 != null ? { s0: rowsArr[r1 - 1].s0, s1: rowsArr[r2 - 1].s1 } : rowsArr[rW - 1];
   return {
-    rows, pax, tier, extraMid, spread: spread > 0, rowsArr, mods, exits, L, seatEnd, slackIv, extra, exitRows, depth, doorType: dt, vest,
+    rows, pax, tier, extraMid, plan: !!planBays, spread: spread > 0, rowsArr, mods, exits, L, seatEnd, slackIv, extra, exitRows, depth, doorType: dt, vest,
     gapMax, gapOK: gapMax <= GAP60 + 1e-9, capacity, cap3, nLav, nGal: mods.filter(x => x.gal).length,
-    wingS: wRow ? (wRow.s0 + wRow.s1) / 2 : P.fwdLen
+    wingS: wRow ? (wRow.s0 + wRow.s1) / 2 : fwdLen
   };
 }
 function placeSlack(base, rows, X, P, tier, extra, slack) {
@@ -455,12 +489,15 @@ function placeSlack(base, rows, X, P, tier, extra, slack) {
 }
 function cabin(rows, X, P, slack) {
   /* 60 ft 간격을 만족할 때까지 출구를 자동 보강: 단계 상향(최대 3) → 중앙 도어 쌍 추가(최대 +3).
-     slack>0 이면 남는 길이를 넣은 상태에서도 규정을 만족해야 한다. */
-  let tier = tierFor(rows * X.ab), extra = 0, up = 0;
+     slack>0 이면 남는 길이를 넣은 상태에서도 규정을 만족해야 한다.
+     도어 계획(doorPlan)이 행 수 부족이거나 60 ft 를 못 지키면 계획을 버리고 자동 구성으로 대체한다. */
+  let tier = tierFor(rows * X.ab), extra = 0, up = 0, PP = P;
   for (;;) {
-    const c0 = build(rows, X, P, tier, 0, extra);
-    const c = (slack > 0.01 && c0.gapOK) ? placeSlack(c0, rows, X, P, tier, extra, slack) : c0;
-    if (c.gapOK || (tier >= 3 && extra >= 3)) { c.upgraded = up > 0; return c; }
+    const c0 = build(rows, X, PP, tier, 0, extra);
+    if (c0.plan && !c0.gapOK) { PP = Object.assign({}, P, { doorPlan: null }); continue; }
+    const c = (slack > 0.01 && c0.gapOK) ? placeSlack(c0, rows, X, PP, tier, extra, slack) : c0;
+    if (c.plan && !c.gapOK) { PP = Object.assign({}, P, { doorPlan: null }); continue; }
+    if (c.gapOK || (tier >= 3 && extra >= 3)) { c.upgraded = up > 0; c.planDropped = !!P.doorPlan && PP !== P; return c; }
     if (tier < 3) tier++; else extra++;
     up++;
   }
@@ -483,7 +520,7 @@ function solve(P) {
     if (P.autoLayout) { const ok = fits.filter(f => f.X.fits); pick = ok.length ? ok.reduce((m, f) => f.X.ab > m.X.ab ? f : m) : fits[0]; }
     else pick = fits.find(f => f.ls === P.layout) || fits[0];
     X = pick.X; layoutStr = pick.ls; Do = P.fuseD; noFit = !X.fits;
-    const Ln0 = P.noseK * Do, Lt0 = P.tailK * Do, ov0 = Math.min(P.overlapK * Do, Lt0);
+    const Ln0 = noseLen(P, Do), Lt0 = P.tailK * Do, ov0 = Math.min(P.overlapK * Do, Lt0);
     const avail = P.fuseL - Ln0 - Lt0 + ov0;
     let rMax = 0; const c00 = cabin(0, X, P, 0);
     if (c00.L > avail) noLen = true;
@@ -497,7 +534,7 @@ function solve(P) {
     }
     c = cabin(rows, X, P, slack); Lf = P.fuseL;
   }
-  const Ln = P.noseK * Do, Lt = P.tailK * Do, ov = Math.min(P.overlapK * Do, Lt, c.L);
+  const Ln = noseLen(P, Do), Lt = P.tailK * Do, ov = Math.min(P.overlapK * Do, Lt, c.L);
   if (Lf == null) Lf = Ln + c.L + Lt - ov;
   let hintSeat = null;
   if (noFit) {                                          // 이 직경에 들어가는 최대 좌석 폭 (0.1 in 단위)
@@ -524,13 +561,13 @@ function evaluate(R) {
     add(R.noLen ? 'bad' : 'ok', '길이 적합', R.noLen ? '전장이 기수·꼬리·최소 서비스 모듈에도 부족합니다' : `${R.rows}행 배치, 미사용 길이 ${R.slack.toFixed(2)} m${R.c.spread ? ' (출구 간격 규정 때문에 행 간격에 분산)' : ''}`, '종방향 구성');
   }
   const side = t => c.exits.filter(e => e.type === t).length;
-  const nI = side('I') + side('A'), nAll = c.exits.length;
+  const nI = side('I') + side('A') + side('B'), nAll = c.exits.length;
   let need = '-', ok = true;
   if (pax > 110) { need = '편측 Type I 이상 ≥ 2'; ok = nI >= 2; }
   else if (pax >= 41) { need = '편측 ≥ 2개소, 그중 Type I 이상 ≥ 1'; ok = nAll >= 2 && nI >= 1; }
   else if (pax >= 20) { need = '편측 ≥ 2개소, 그중 Type II 이상 ≥ 1'; ok = nAll >= 2; }
   add(ok ? 'ok' : 'bad', '출구 최소 개소', `${pax}석 → ${need} / 현재 편측 ${nAll}개소 (Type I 이상 ${nI})`, '14 CFR 25.807(g)');
-  add(c.capacity >= pax ? 'ok' : 'bad', '출구 용량 합계', `상한 합 ${c.capacity}석 ≥ ${pax}석 (Type I 45 · A 110 · III 35, III 합계는 65/70석 제한). 양측 합산은 해석`, '14 CFR 25.807(g)');
+  add(c.capacity >= pax ? 'ok' : 'bad', '출구 용량 합계', `상한 합 ${c.capacity}석 ≥ ${pax}석 (Type I 45 · A 110 · B 75 · III 35, III 합계는 65/70석 제한). 양측 합산은 해석`, '14 CFR 25.807(g)');
   add(c.gapOK ? 'ok' : 'bad', '출구 간격 ≤ 60 ft', `최대 간격 ${c.gapMax.toFixed(1)} m (한계 ${GAP60.toFixed(2)} m)${c.upgraded ? ' — 자동으로 출구 단계를 보강했습니다' : ''}`, '14 CFR 25.807(f)');
   const sideGrp = Math.max(X.layout[0], X.layout[X.layout.length - 1]);
   if (c.exitRows.size && pax >= 60) {
@@ -539,6 +576,7 @@ function evaluate(R) {
     add(single || alt ? 'ok' : 'warn', 'Type III 접근 통로 (근사)', `출구 측 ${sideGrp}석 → 통로 ${sideGrp >= 3 ? '20 in 또는 6 in×2 대안' : '10 in'} 필요 / 출구열 앞 여유 ${have.toFixed(1)} in (= 열 간격 − 좌석 깊이 ${(c.depth / IN).toFixed(1)} in 가정)${single ? '' : alt ? ' → 6 in×2 대안으로 충족' : ''}`, '14 CFR 25.813(c)');
   } else add('info', 'Type III 접근 통로', c.exitRows.size ? '60석 미만: 10/20 in 규정 적용 대상 아님' : '오버윙 Type III 출구 없음', '14 CFR 25.813(c)');
   add('info', '90초 탈출 (25.803)', `${pax > 44 ? '44석 초과: 만석·절반 출구 90초 입증 필요' : '44석 이하'} — 본 도구는 입증하지 않습니다`, '14 CFR 25.803');
+  if (planOf(P)) add('info', '도어 위치 (도면 고정)', c.plan ? `공식 도면 ${planOf(P).length}쌍: ${planOf(P).map(d => d.x.toFixed(2) + ' m ' + TYPE[d.t].nm).join(' · ')} (중앙 도어는 행 간격 미세 조정으로 맞춤)` : '행 수가 부족하거나 도면 위치로는 60 ft 간격을 못 지켜 도면 고정을 적용하지 않고 자동 출구 구성을 사용합니다', '공식 도어 위치 도면');
   add('info', '화장실 · 갤리', `화장실 ${c.nLav}개 (1/${P.lavPer}명 가정) · 갤리 ${c.nGal}개`, '설계 가정');
   add('info', '단면 곡률 보정', `객실 폭 ${X.W.toFixed(2)} m → 내경 ${X.Di.toFixed(2)} m (보정 ${X.margin >= 0 ? '+' : '−'}${Math.abs(X.margin * 100).toFixed(0)} cm), 중심선 객실 높이 ${(X.f + X.b).toFixed(2)} m`, '단면 기하');
   return out;
@@ -606,6 +644,8 @@ function syncControls() {
   });
   ctlMap.exitIn.inp.disabled = P.exitAuto;
   $('#exitAuto').checked = P.exitAuto; $('#autoLayout').checked = P.autoLayout; $('#aftFront').checked = P.aftFront;
+  const pl = planOf(P); $('#planInfo').style.display = pl ? '' : 'none';
+  if (pl) $('#planTxt').textContent = `— 공식 도면 ${pl.length}쌍(${pl.map(d => d.x.toFixed(2) + ' m ' + d.t).join(' · ')})${RES && RES.c.plan ? '' : ' · 현재 행 수 부족 또는 60 ft 초과로 미적용'}`;
   $('#secSeat').style.display = P.mode === 'seat' ? '' : 'none';
   $('#secFuse').style.display = P.mode === 'fuse' ? '' : 'none';
   $('#autoRow').style.display = P.mode === 'fuse' ? '' : 'none';
@@ -615,7 +655,7 @@ function setSeg(sel, v) { document.querySelectorAll(sel + ' button').forEach(b =
 function bindSeg(sel, fn) { document.querySelectorAll(sel + ' button').forEach(b => b.addEventListener('click', () => fn(b.dataset.v))); }
 
 function setBody(b) {
-  P.body = b; P.layout = DEF_LAYOUT[b]; Object.assign(P, { pax: BODY_DEF[b].pax, rows: BODY_DEF[b].rows, fuseL: BODY_DEF[b].L, fuseD: BODY_DEF[b].D, aisleIn: BODY_DEF[b].aisle, shellIn: BODY_DEF[b].shell });
+  P.body = b; P.layout = DEF_LAYOUT[b]; Object.assign(P, { pax: BODY_DEF[b].pax, rows: BODY_DEF[b].rows, fuseL: BODY_DEF[b].L, fuseD: BODY_DEF[b].D, aisleIn: BODY_DEF[b].aisle, shellIn: BODY_DEF[b].shell, doorPlan: null });
   activePreset = null; view.auto = true;
 }
 function applyPreset(id) {
@@ -725,7 +765,7 @@ function drawLopa() {
     ctx.beginPath(); ctx.moveTo(wx(wxA), wy(sg * 0.08 * R.Ro)); ctx.lineTo(wx(wxB), wy(sg * 0.40 * R.Ro)); ctx.lineTo(wx(wxB + 0.0), wy(sg * 0.60 * R.Ro));
     ctx.lineTo(wx(wxA - 0.05 * R.Ln), wy(sg * 0.30 * R.Ro)); ctx.closePath(); ctx.fill(); ctx.stroke();
   });
-  hits.push({ x0: 0, x1: R.Ln, v0: -R.Ro, v1: R.Ro, tip: `기수·조종실 구간\n길이 ${R.Ln.toFixed(2)} m (${R.P.noseK.toFixed(2)} D)` });
+  hits.push({ x0: 0, x1: R.Ln, v0: -R.Ro, v1: R.Ro, tip: `기수·조종실 구간\n길이 ${R.Ln.toFixed(2)} m (${(R.Ln / R.Do).toFixed(2)} D)` });
 
   /* 내부 객실 */
   ctx.save(); fuselagePath(R, ctx); ctx.clip();
@@ -997,7 +1037,7 @@ function updatePanels() {
   $('#kLDD').textContent = `객실 길이/폭 ${f2(c.L / X.W, 1)}`;
   const upg = c.upgraded ? ' (보강)' : '';
   const nDoor = c.exits.filter(e => e.kind === 'door').length, nOw = c.exits.filter(e => e.kind === 'ow').length;
-  const tierName = `${TYPE[c.doorType].nm} ${nDoor}쌍` + (nOw ? ` + 오버윙 III ${nOw}쌍` : '');
+  const tierName = c.plan ? `도어 ${nDoor}쌍 (${c.exits.map(e => e.type).join('·')}) · 도면 위치` : `${TYPE[c.doorType].nm} ${nDoor}쌍` + (nOw ? ` + 오버윙 III ${nOw}쌍` : '');
   $('#chips').innerHTML = [
     ['객실 길이', f2(c.L) + ' m'], ['행 수', R.rows], ['화장실', c.nLav], ['갤리', c.nGal],
     ['출구', `${c.exits.length}쌍 · ${tierName}${upg}`], ['출구 용량', c.capacity + '석'], ['최대 출구 간격', f2(c.gapMax, 1) + ' m'],
@@ -1038,28 +1078,28 @@ function updateCompare() {
   const host = $('#cmp'), ps = PRESETS.find(p => p.id === activePreset);
   if (!ps) { host.innerHTML = '<p class="small">좌측 “기준 기종 불러오기”에서 기종을 선택하세요. 현재 설정으로 계산한 값과 Airbus 공식 제원의 오차를 보여줍니다.</p>'; return; }
   const X = cross(parse(ps.layout), P, null);
-  const Ln = P.noseK * X.DoReq, Lt = P.tailK * X.DoReq, ov = Math.min(P.overlapK * X.DoReq, Lt);
+  const Ln = noseLen(P, X.DoReq), Lt = P.tailK * X.DoReq, ov = Math.min(P.overlapK * X.DoReq, Lt);
   const row = (nm, sim, ref, unit = 'm') => {
     if (ref == null) return `<tr><td>${nm}</td><td>${f2(sim)}</td><td>—</td><td>—</td></tr>`;
     const e = (sim - ref) / ref * 100; return `<tr><td>${nm}</td><td>${f2(sim)}</td><td>${f2(ref)}</td><td class="err ${errCls(e)}">${e >= 0 ? '+' : ''}${f2(e, 1)}%</td></tr>`;
   };
   /* 공식 객실 길이·전장 안에서 시뮬레이터가 넣을 수 있는 최대 승객 (참고값) */
   const maxRows = Lmax => { let r = 0; for (let i = 1; i <= 200; i++) { if (cabin(i, X, P, 0).L > Lmax) break; r = i; } return r; };
-  const availRef = ps.L - P.noseK * ps.Do - P.tailK * ps.Do + Math.min(P.overlapK * ps.Do, P.tailK * ps.Do);
+  const availRef = ps.L - noseLen(P, ps.Do) - P.tailK * ps.Do + Math.min(P.overlapK * ps.Do, P.tailK * ps.Do);
   const paxL = ps.Lcab != null ? maxRows(ps.Lcab) * X.ab : null, paxF = maxRows(availRef) * X.ab;
   let doorRows = '';
   if (ps.doors) {                                       // 공식 도어 위치(기수에서 중심선) 대비: 공식 치수 동체 주도 해석 결과
     const rr = solve(Object.assign({}, P, { mode: 'fuse', body: ps.body, layout: ps.layout, autoLayout: false, fuseL: ps.L, fuseD: ps.Do }));
     if (!rr.noFit && !rr.noLen && rr.c.exits.length === ps.doors.length) {
-      const nm = ['전방 도어', '오버윙 출구 ①', '오버윙 출구 ②', '후방 도어'];
+      const nm = ps.doorNames || ['전방 도어', '오버윙 출구 ①', '오버윙 출구 ②', '후방 도어'];
       doorRows = ps.doors.map((d, i) => { const x = rr.Ln + rr.c.exits[i].s, e = x - d, a = Math.abs(e);
         return `<tr><td>${nm[i]} 위치 (m)</td><td>${f2(x)}</td><td>${f2(d)}</td><td class="err ${a <= 0.2 ? 'ok' : a <= 0.5 ? 'warn' : 'bad'}">${e >= 0 ? '+' : ''}${f2(e)} m</td></tr>`; }).join('');
     }
   }
   let calInfo = '';
   if (ps.cal) {
-    const same = Object.keys(ps.cal).every(k => typeof ps.cal[k] === 'number' ? Math.abs(P[k] - ps.cal[k]) < 1e-9 : P[k] === ps.cal[k]);
-    calInfo = `<p class="small" style="margin:8px 0 0"><b style="color:var(--acc)">${same ? '보정값 적용됨' : '보정값이 수정됨'}</b> — 좌석 쿠션 ${ps.cal.seatIn} + 팔걸이 ${ps.cal.armIn} in(좌석 모듈 ${(ps.cal.seatIn + ps.cal.armIn).toFixed(1)} in) · 통로 ${ps.cal.aisleIn} in · 측벽 여유 ${ps.cal.clrIn} in · 쉘 ${ps.cal.shellIn} in · 꼬리 내 객실 중첩 ${ps.cal.overlapK}D. 좌석·통로·팔걸이·여유의 공식 mm 값은 확인하지 못해, 공식 외경·최대 객실 폭·비객실 길이에 맞춰 역산한 값입니다. ${ps.note || ''}${same ? '' : ' <a href="#" id="recal" style="color:var(--acc)">보정값 다시 적용</a>'}</p>`;
+    const same = Object.keys(ps.cal).every(k => typeof ps.cal[k] === 'number' ? Math.abs(P[k] - ps.cal[k]) < 1e-9 : typeof ps.cal[k] === 'object' ? JSON.stringify(P[k]) === JSON.stringify(ps.cal[k]) : P[k] === ps.cal[k]);
+    calInfo = `<p class="small" style="margin:8px 0 0"><b style="color:var(--acc)">${same ? '보정값 적용됨' : '보정값이 수정됨'}</b> — 좌석 쿠션 ${ps.cal.seatIn} + 팔걸이 ${ps.cal.armIn} in(좌석 모듈 ${(ps.cal.seatIn + ps.cal.armIn).toFixed(1)} in) · 통로 ${ps.cal.aisleIn} in · 측벽 여유 ${ps.cal.clrIn} in · 쉘 ${ps.cal.shellIn} in · 꼬리 내 객실 중첩 ${ps.cal.overlapK}D${ps.cal.pitchIn ? ` · 피치 ${ps.cal.pitchIn} in · 화장실 1/${ps.cal.lavPer}명` : ''}. 좌석·통로·팔걸이·여유의 공식 mm 값은 확인하지 못해, 공식 외경·최대 객실 폭·비객실 길이에 맞춰 역산한 값입니다. ${ps.note || ''}${same ? '' : ' <a href="#" id="recal" style="color:var(--acc)">보정값 다시 적용</a>'}</p>`;
   }
   host.innerHTML = `<table><thead><tr><th>${ps.name} (${ps.layout})</th><th>시뮬</th><th>공식</th><th>오차</th></tr></thead><tbody>
     ${row('동체 외경 (m)', X.DoReq, ps.Do)}
@@ -1097,6 +1137,7 @@ function init() {
   $('#autoLayout').onchange = e => { P.autoLayout = e.target.checked; view.auto = true; update(); };
   $('#exitAuto').onchange = e => { P.exitAuto = e.target.checked; update(); };
   $('#aftFront').onchange = e => { P.aftFront = e.target.checked; update(); };
+  $('#planClear').onclick = e => { e.preventDefault(); P.doorPlan = null; update(); };
   $('#presets').innerHTML = PRESETS.map(p => `<button class="btn" data-id="${p.id}" title="${p.name}: 전장 ${p.L} m · 동체 폭 ${p.Do} m · 최대 객실 폭 ${p.Wcab} m${p.cal ? ' · 공식 외경·내경에 맞춘 보정값 함께 적용' : ''}">${p.name}${p.cal ? ' <small style="color:var(--acc)">보정</small>' : ''}</button>`).join('');
   document.querySelectorAll('#presets button').forEach(b => b.onclick = () => { applyPreset(b.dataset.id); update(); });
   $('#resetAll').onclick = () => { P = Object.assign({}, DEF); activePreset = null; view.auto = true; update(); };
