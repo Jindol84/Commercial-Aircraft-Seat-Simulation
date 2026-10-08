@@ -4,12 +4,30 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>민항기 객실·동체 사이징 시뮬레이터</title>
+<script>
+(function () { var m = 'auto'; try { m = localStorage.getItem('cabinSimTheme') || 'auto'; } catch (e) {}
+  var d = m === 'auto' ? (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : m;
+  document.documentElement.setAttribute('data-theme', d === 'light' ? 'light' : 'dark'); })();
+</script>
 <style>
 :root{
   --bg:#0a0e14; --p1:#10161f; --p2:#151d29; --p3:#1b2533; --line:#263246;
   --txt:#e6ecf5; --mut:#8b9ab0; --acc:#38bdf8;
   --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
   --seat:#2f6df0; --lav:#22d3ee; --galley:#f59e0b; --path:#fde68a; --exit:#22c55e;
+  --on-acc:#04202e; --faint:#8196b0; --glass:#0a0e14c0; --glass2:#0f1722cc;
+  --bn-bg:#3b1d1d; --bn-line:#7f2d2d; --bn-txt:#fecaca; --bn-ibg:#13283a; --bn-iline:#1f4a6b; --bn-itxt:#bae6fd;
+  --tip-bg:#0b121c; --tip-line:#33465f; --tip-txt:#e6ecf5;
+  color-scheme:dark;
+}
+:root[data-theme=light]{
+  --bg:#eef2f7; --p1:#ffffff; --p2:#f1f5f9; --p3:#e6ecf3; --line:#c6d1de;
+  --txt:#0f172a; --mut:#475569; --acc:#0369a1;
+  --ok:#047857; --warn:#b45309; --bad:#b91c1c;
+  --on-acc:#ffffff; --faint:#55657a; --glass:#ffffffd9; --glass2:#ffffffe6;
+  --bn-bg:#fee2e2; --bn-line:#f87171; --bn-txt:#7f1d1d; --bn-ibg:#e0f2fe; --bn-iline:#7dd3fc; --bn-itxt:#0c4a6e;
+  --tip-bg:#ffffff; --tip-line:#94a3b8; --tip-txt:#0f172a;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--txt)}
@@ -24,7 +42,8 @@ h1{font-size:17px;margin:0 0 2px;letter-spacing:-.2px}
 .sec>h2{font-size:11px;font-weight:600;letter-spacing:.8px;color:var(--mut);margin:0 0 8px;text-transform:uppercase}
 .seg{display:flex;background:var(--p3);border:1px solid var(--line);border-radius:8px;padding:3px;gap:3px}
 .seg button{flex:1;border:0;background:transparent;padding:7px 6px;border-radius:6px;cursor:pointer;color:var(--mut);font-weight:600}
-.seg button.on{background:var(--acc);color:#04202e}
+.seg button.on{background:var(--acc);color:var(--on-acc)}
+.seg.mini{padding:2px;gap:2px;margin:0 0 10px}.seg.mini button{padding:3px 4px;font-size:12px}
 .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .pill{border:1px solid var(--line);background:var(--p3);border-radius:999px;padding:5px 11px;cursor:pointer;font-weight:600;font-variant-numeric:tabular-nums}
 .pill small{display:block;font-weight:400;font-size:10px;color:var(--mut);line-height:1.1}
@@ -37,7 +56,7 @@ h1{font-size:17px;margin:0 0 2px;letter-spacing:-.2px}
 .ctl .num{width:78px;background:var(--p3);border:1px solid var(--line);border-radius:6px;padding:2px 6px;text-align:right;color:var(--acc);font-variant-numeric:tabular-nums}
 .ctl .num:focus{outline:1px solid var(--acc);border-color:var(--acc)}
 .ctl .badge{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;font-size:10px;font-weight:600;border:1px solid var(--line);color:var(--mut)}
-.ctl .badge.in{background:var(--acc);border-color:var(--acc);color:#04202e}
+.ctl .badge.in{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
 .ctl .rng{font-size:11px;color:var(--mut);margin-top:2px}
 input[type=range]{width:100%;margin:5px 0 0;accent-color:var(--acc);height:18px}
 input[type=range]:disabled{opacity:.35}
@@ -49,7 +68,12 @@ summary::before{content:"▸ ";color:var(--acc)} details[open]>summary::before{c
 details .hint{font-size:11.5px;color:var(--mut);margin:6px 0 10px}
 .btn{border:1px solid var(--line);background:var(--p3);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600}
 .btn:hover{border-color:var(--acc)}
-.presets{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+select{width:100%;background:var(--p3);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:7px 8px;font-weight:600;cursor:pointer}
+select:focus{outline:1px solid var(--acc);border-color:var(--acc)}
+select option:disabled{color:var(--mut)}
+.fld{display:block;font-size:11.5px;color:var(--mut);margin:0 0 3px}
+.row2{display:grid;grid-template-columns:1fr 1.5fr;gap:6px;margin-bottom:6px}
+.row2 label{min-width:0}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .card{background:var(--p1);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
 .kpi .k{font-size:11.5px;color:var(--mut);letter-spacing:.2px}
@@ -59,19 +83,19 @@ details .hint{font-size:11.5px;color:var(--mut);margin:6px 0 10px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{background:var(--p2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--mut)}
 .chip b{color:var(--txt);font-weight:600;font-variant-numeric:tabular-nums}
-.banner{display:none;background:#3b1d1d;border:1px solid #7f2d2d;color:#fecaca;border-radius:10px;padding:8px 12px;font-size:13px}
+.banner{display:none;background:var(--bn-bg);border:1px solid var(--bn-line);color:var(--bn-txt);border-radius:10px;padding:8px 12px;font-size:13px}
 .banner.on{display:block}
-.banner.info{background:#13283a;border-color:#1f4a6b;color:#bae6fd}
+.banner.info{background:var(--bn-ibg);border-color:var(--bn-iline);color:var(--bn-itxt)}
 .viewport{position:relative;background:var(--p1);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 #lopa{display:block;width:100%;height:clamp(300px,46vh,520px);cursor:grab;touch-action:none}
 #lopa.drag{cursor:grabbing}
 .tools{position:absolute;top:10px;right:10px;display:flex;gap:6px}
-.tools .btn{padding:5px 10px;font-size:12.5px;background:#0f1722cc;backdrop-filter:blur(4px)}
-.legend{position:absolute;left:12px;bottom:10px;display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--mut);background:#0a0e14c0;padding:5px 9px;border-radius:8px;max-width:calc(100% - 24px)}
+.tools .btn{padding:5px 10px;font-size:12.5px;background:var(--glass2);backdrop-filter:blur(4px)}
+.legend{position:absolute;left:12px;bottom:10px;display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--mut);background:var(--glass);padding:5px 9px;border-radius:8px;max-width:calc(100% - 24px)}
 .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-.hint2{position:absolute;right:12px;bottom:10px;font-size:11px;color:#5d7391;background:#0a0e14c0;padding:3px 8px;border-radius:8px}
+.hint2{position:absolute;right:12px;bottom:10px;font-size:11px;color:var(--faint);background:var(--glass);padding:3px 8px;border-radius:8px}
 .vtitle{position:absolute;left:12px;top:10px;font-size:12px;color:var(--mut)}
-#tip{position:fixed;pointer-events:none;z-index:9;background:#0b121c;border:1px solid #33465f;color:var(--txt);padding:6px 9px;border-radius:8px;font-size:12px;max-width:290px;display:none;box-shadow:0 6px 20px #0008;white-space:pre-line}
+#tip{position:fixed;pointer-events:none;z-index:9;background:var(--tip-bg);border:1px solid var(--tip-line);color:var(--tip-txt);padding:6px 9px;border-radius:8px;font-size:12px;max-width:290px;display:none;box-shadow:0 6px 20px #0008;white-space:pre-line}
 .bottom{display:grid;grid-template-columns:minmax(340px,1.15fr) minmax(280px,1fr) minmax(280px,1fr);gap:12px}
 .card h3{margin:0 0 8px;font-size:13px;font-weight:600}
 #xsec{display:block;width:100%;height:420px}
@@ -80,7 +104,7 @@ details .hint{font-size:11.5px;color:var(--mut);margin:6px 0 10px}
 .rules .dot{width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--mut)}
 .rules .ok .dot{background:var(--ok)} .rules .warn .dot{background:var(--warn)} .rules .bad .dot{background:var(--bad)} .rules .info .dot{background:var(--acc)}
 .rules .t{font-weight:600} .rules .dtl{color:var(--mut);font-size:11.5px}
-.rules .ref{color:#5d7391;font-size:10.5px}
+.rules .ref{color:var(--faint);font-size:10.5px}
 table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
 th,td{padding:5px 6px;text-align:right;border-bottom:1px solid var(--line)}
 th:first-child,td:first-child{text-align:left}
@@ -98,13 +122,20 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
 <aside>
   <h1>객실·동체 사이징 시뮬레이터</h1>
   <p class="sub">완전 오프라인 · 단일 파일 · 개념설계용 (규정 검사는 근사 지표)</p>
+  <div class="seg mini" id="themeSeg" title="화면 테마: 자동은 OS·브라우저 설정을 따릅니다">
+    <button data-v="auto">자동</button><button data-v="light">라이트</button><button data-v="dark">다크</button>
+  </div>
+
+  <div class="sec"><h2>기종 프리셋 (제작사 · 기종)</h2>
+    <div class="row2">
+      <label><span class="fld">제작사</span><select id="makerSel" title="제작사"></select></label>
+      <label><span class="fld">기종</span><select id="modelSel" title="기종 — 선택하면 공식 전장·외경과 보정값을 불러옵니다"></select></label>
+    </div>
+    <p class="small" id="presetInfo" style="margin:0"></p>
+  </div>
 
   <div class="sec"><h2>동체 형식 · 좌석 배열</h2>
-    <div class="seg" id="bodySeg">
-      <button data-v="narrow" title="단일 통로 (통로 1개)">협동체</button>
-      <button data-v="wide" title="이중 통로 (통로 2개)">광동체</button>
-    </div>
-    <div class="pills" id="layoutPills"></div>
+    <select id="layoutSel" title="동체 형식과 좌석 배열 — 항목의 외경은 그 배열에 필요한 최소 외경입니다"></select>
     <label class="chk" id="autoRow" style="margin-top:10px"><input type="checkbox" id="autoLayout"> 외경을 바꾸면 들어가는 최대 배열 자동 선택</label>
   </div>
 
@@ -116,7 +147,7 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
   <div class="sec"><h2>좌석 치수</h2><div id="slCommon"></div></div>
 
   <details id="adv"><summary>고급 설정 (통로·쉘·여유·단면·길이 계수)</summary>
-    <p class="hint">기본값은 <b>A320 기준</b>(Airbus 단면·도어 위치 도면)입니다. 요구 규칙의 원래 값(측벽 여유 3.5 in · 쉘 6 in · 기수 1.4D · 후방 모듈 2.5 m · 출구열 +10 in 등)과 다른 항목이 있으니, 필요하면 아래 버튼으로 되돌릴 수 있습니다. 기종 프리셋을 누르면 해당 기종의 보정값이 적용됩니다.</p>
+    <p class="hint">기본값은 <b>A320 기준</b>(Airbus 단면·도어 위치 도면)입니다. 요구 규칙의 원래 값(측벽 여유 3.5 in · 쉘 6 in · 기수 1.4D · 후방 모듈 2.5 m · 출구열 +10 in 등)과 다른 항목이 있으니, 필요하면 아래 버튼으로 되돌릴 수 있습니다. 기종 프리셋을 고르면 해당 기종의 보정값이 적용됩니다.</p>
     <button class="btn" id="ruleDef" type="button" style="width:100%;margin:0 0 12px">요구 규칙의 원래 기본값 적용</button>
     <div id="slAdv"></div>
     <label class="chk"><input type="checkbox" id="exitAuto"> 출구열 추가 피치 자동 (25.813(c) 근사)</label>
@@ -125,10 +156,6 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
     <div id="slAdv2"></div>
   </details>
 
-  <div class="sec"><h2>기준 기종 불러오기 (Airbus 공식 제원)</h2>
-    <div class="presets" id="presets"></div>
-    <p class="small" style="margin:8px 0 0">배열·전장·직경을 불러옵니다. 모든 프리셋은 공식 외경·최대 객실 폭·비객실 길이에 맞춘 보정값(좌석·여유·쉘·꼬리 중첩)이 함께 적용됩니다. 우측 하단 표에서 오차를 확인하세요.</p>
-  </div>
   <div class="sec"><button class="btn" id="resetAll" style="width:100%">모든 설정 초기화</button></div>
 </aside>
 
@@ -160,12 +187,13 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
   <section class="bottom">
     <div class="card"><h3>동체 단면 (Cross-section)</h3><canvas id="xsec"></canvas></div>
     <div class="card"><h3>규정·설계 검사 <span class="small">(마우스를 올리면 근거 조항)</span></h3><ul class="rules" id="rules"></ul></div>
-    <div class="card"><h3>기준 기종 대비 오차</h3><div id="cmp"><p class="small">좌측 “기준 기종 불러오기”에서 기종을 선택하세요.</p></div></div>
+    <div class="card"><h3>기준 기종 대비 오차</h3><div id="cmp"><p class="small">좌측 “기종 프리셋”에서 제작사와 기종을 선택하세요.</p></div></div>
   </section>
 
   <section class="card notes">
     <details><summary>가정·한계·출처 (반드시 확인)</summary>
       <ul>
+        <li><b>화면</b>: 상단 “자동 · 라이트 · 다크”로 테마를 바꿉니다(자동은 OS·브라우저 설정을 따르고, 선택은 이 브라우저에 저장). 라이트 모드의 글자는 모두 어두운 색이며 LOPA·단면 캔버스 색도 모드에 따라 바뀝니다. 기종은 “제작사 → 기종” 드롭다운(계열별 묶음)으로 고르고, 동체 형식과 좌석 배열은 한 드롭다운(협동체/광동체 묶음, 항목마다 열 수·필요 외경)으로 고릅니다. Boeing 항목은 자리만 있으며 기종이 없어 “---”로 표시됩니다.</li>
         <li><b>치수 연동</b>: 승객 수·행 수·전장·외경은 하나의 상태에서 서로 계산됩니다. 마지막으로 조작한 값이 <b>기준</b>이고 나머지는 <b>자동</b>입니다 — 승객 수·행 수를 바꾸면 전장(과 배열의 필요 외경)이, 전장·외경을 바꾸면 승객 수·행 수(와 배열)가 따라 움직입니다. 피치·좌석 폭·통로 같은 다른 값도 같은 상태를 거치므로 결과가 즉시 반영됩니다. 승객 수의 한계는 고정값이 아니라 <b>현재 배열·피치·좌석 폭으로 전장 슬라이더 상한(협동체 60 m · 광동체 90 m, 모델 범위)까지 배치되는 행 수</b>로 계산합니다(예: 3-3 · 피치 31 in → 최대 306석). 목표 승객 수가 현재 배열의 한계를 넘으면 가로 좌석 수가 더 많은 배열(협동체 2-2 → 3-2 → 3-3 → 광동체 2-3-2 → 2-4-2 → 3-3-3 → 3-4-3)로 자동 전환하며, 광동체로 넘어갈 때는 광동체 기본 통로 20 in · 쉘 6 in를 적용합니다. 승객 수를 줄이면 원래 구성(통로·쉘 값 포함)으로 돌아갑니다. 기종 프리셋은 공식 전장·외경을 기준으로 승객 수를 계산합니다. 전장 상한은 설계 가정이며 실제 기종의 한계가 아닙니다.</li>
         <li><b>좌석 폭</b> = 팔걸이 사이 쿠션 폭, 팔걸이는 인접 좌석이 공유합니다 (팔걸이 수 = 좌석 수 + 좌석 군 수).</li>
         <li><b>곡률 보정</b>: 바닥이 단면 중심 아래(반경의 16%, A320 도면에서 역산한 가정)에 있다고 보고, 팔걸이 높이(25 in = 0.635 m)에서의 객실 폭과 바닥 가장자리가 단면 안에 들어가는 최소 반경을 닫힌 형태로 계산합니다.</li>
@@ -277,21 +305,22 @@ const A350_OLD_CAL = Object.assign({ clrIn: 2.0, shellIn: 6.9, overlapK: 0.87, a
 const CAL_KEYS = ['seatIn', 'armIn', 'aisleIn', 'clrIn', 'shellIn', 'floorK', 'aspect', 'noseK', 'tailK', 'overlapK',
                   'aftLen', 'aftFront', 'owX', 'owGap', 'exitAuto', 'exitIn', 'pitchIn', 'lavPer', 'doorPlan', 'doorI'];
 const A320_DOORS = [5.04, 14.43, 15.28, 29.53];
+const MAKERS = ['Airbus', 'Boeing'];                         // Boeing 은 항목만 두고 프리셋 없음 (드롭다운에 --- 표시)
 const PRESETS = [
-  { id: 'A320', name: 'A320ceo', body: 'narrow', layout: '3-3', L: 37.57, Lcab: 27.51, Do: 3.95, Wcab: 3.70, cal: A320_CAL, doors: A320_DOORS,
+  { id: 'A320', maker: 'Airbus', fam: 'A320 계열', name: 'A320ceo', body: 'narrow', layout: '3-3', L: 37.57, Lcab: 27.51, Do: 3.95, Wcab: 3.70, cal: A320_CAL, doors: A320_DOORS,
     note: 'Airbus 도면 “6 ABREAST-WIDER SEAT” 치수(좌석 18 in · 팔걸이 2 in · 통로 19 in · 합계 143 in)와 도어 위치(5.04/14.43/15.28/29.53 m)를 그대로 썼습니다. 바닥 위치 16%와 측벽 여유 0.1 in는 이 치수가 내경 3.70 m에 들어가도록 역산한 값입니다.' },
-  { id: 'A320w', name: 'A320 와이더 통로', body: 'narrow', layout: '3-3', L: 37.57, Lcab: 27.51, Do: 3.95, Wcab: 3.70, cal: A320W_CAL, doors: A320_DOORS,
+  { id: 'A320w', maker: 'Airbus', fam: 'A320 계열', name: 'A320 와이더 통로', body: 'narrow', layout: '3-3', L: 37.57, Lcab: 27.51, Do: 3.95, Wcab: 3.70, cal: A320W_CAL, doors: A320_DOORS,
     note: 'Airbus 도면 “6 ABREAST-WIDER AISLE”: 좌석 17 in(3연석 59 in) · 통로 25 in · 합계 143 in. 나머지는 A320과 같습니다.' },
-  { id: 'A321', name: 'A321ceo', body: 'narrow', layout: '3-3', L: 44.51, Lcab: 34.44, Do: 3.95, Wcab: 3.70, cal: A321_CAL,
+  { id: 'A321', maker: 'Airbus', fam: 'A320 계열', name: 'A321ceo', body: 'narrow', layout: '3-3', L: 44.51, Lcab: 34.44, Do: 3.95, Wcab: 3.70, cal: A321_CAL,
     doors: [5.02, 13.84, 24.79, 36.58], doorNames: ['도어 1 (전방)', '도어 2 (비상구)', '도어 3 (비상구)', '도어 4 (후방)'],
     note: 'Airbus A321 도면 기준: 단면은 A320과 같고(좌석 18 in · 팔걸이 2 in · 통로 19 in · 합계 143 in), 도어 4쌍(5.02 · 13.84 · 24.79 · 36.58 m, 모두 폭 0.81~0.83 m × 높이 1.85 m), 중앙 갤리·화장실 없음(도어 2·3은 비상구), 대표 2클래스 구성 피치 32 in · 화장실 1/55명(185석·220석 모두 4개). 객실 길이 34.44 m는 Airbus 페이지 값이고 비객실 길이 10.07 m가 A320(10.06 m)과 같아 기수·꼬리 비율이 같습니다. 도어 위치 고정은 약 21행(126석) 이상에서 적용됩니다. 공식 좌석 수는 2클래스 185석(퍼스트 16 + 이코노미 169)·단일 클래스 고밀도 220석이며 모델 승객 수와 비교하는 참고값입니다(이 모델은 이코노미 단일 클래스).' },
-  { id: 'A330', name: 'A330-300', body: 'wide', layout: '2-4-2', L: 63.66, Lcab: 50.36, Do: 5.64, Wcab: 5.26, cal: A330_CAL,
+  { id: 'A330', maker: 'Airbus', fam: 'A330 계열', name: 'A330-300', body: 'wide', layout: '2-4-2', L: 63.66, Lcab: 50.36, Do: 5.64, Wcab: 5.26, cal: A330_CAL,
     doors: [5.85, 17.74, 35.96, 50.96], doorNames: ['도어 1 (전방)', '도어 2 (중앙)', '도어 3 (비상구)', '도어 4 (후방)'],
     note: 'Airbus A330 도면 기준: 이코노미 8열 좌석 18 in · 팔걸이 2 in · 통로 평균 19 in(합계 204 in), 도어 4쌍(5.85 · 17.74 · 35.96 · 50.96 m, 중앙·후방 Type A 1.07 m, 비상구 도어 3 은 0.81 m = Type B 32 in 와 일치, 도어 1 은 도면에 없어 Type A 가정), 꼬리 원추 1.99D, 대표 구성 피치 32 in · 화장실 1/33명. 도어 위치 고정은 약 33행(264석) 이상에서 적용되고 그보다 작으면 자동 출구 구성을 씁니다.' },
-  { id: 'A350', name: 'A350-900', body: 'wide', layout: '3-3-3', L: 66.80, Lcab: 51.04, Do: 5.94, Wcab: 5.71, cal: A350_CAL,
+  { id: 'A350', maker: 'Airbus', fam: 'A350 계열', name: 'A350-900', body: 'wide', layout: '3-3-3', L: 66.80, Lcab: 51.04, Do: 5.94, Wcab: 5.71, cal: A350_CAL,
     doors: [6.82, 18.86, 37.93, 52.55], doorNames: ['도어 1 (전방)', '도어 2', '도어 3', '도어 4 (후방)'],
     note: 'Airbus A350 도면 기준: 이코노미 9열 좌석 18 in · 팔걸이 1.5 in · 통로 18.1 in, 도어 4쌍(6.82 · 18.86 · 37.93 · 52.55 m, 모두 폭 1.26 m인 Type A 확대형), 피치 32 in · 화장실 1/35명. 도면의 단면·전장은 확대 이전 개정판으로 보여, 현행 객실(5.71 m)은 같은 좌석·통로 치수에 늘어난 폭을 측벽 여유 4.1 in로 처리했습니다(Airbus 설명: 양쪽 2 in씩 확대). 도어 위치는 개정 전 도면 값이라 현행 전장(+0.19 m)과 최대 0.19 m 어긋날 수 있습니다. 꼬리·비객실 길이는 현행 페이지 값을 가정했습니다.' },
-  { id: 'A350o', name: 'A350-900 개정 전', body: 'wide', layout: '3-3-3', L: 66.61, Lcab: null, Do: 5.96, Wcab: 5.61, cal: A350_OLD_CAL,
+  { id: 'A350o', maker: 'Airbus', fam: 'A350 계열', name: 'A350-900 개정 전', body: 'wide', layout: '3-3-3', L: 66.61, Lcab: null, Do: 5.96, Wcab: 5.61, cal: A350_OLD_CAL,
     doors: [6.82, 18.86, 37.93, 52.55], doorNames: ['도어 1 (전방)', '도어 2', '도어 3', '도어 4 (후방)'],
     note: '2022년 객실 확대(221→225 in) 이전 값입니다(첨부 보고서·Airbus 기사·Inside Flyer 기사·AC 도면 전장 66.61 m가 일치). 좌석 18 in · 팔걸이 1.5 in · 통로 18.1 in · 도어 4쌍은 같은 AC 도면 값이고, 측벽 여유 2.0 in는 내경 5.61 m에서 역산했으며 단면 높이 6.09 m(종횡비 1.022)를 반영했습니다. 비객실 길이는 현행 페이지 값(15.76 m)을 가정했습니다.' }
 ];
@@ -312,6 +341,34 @@ const DEF = {
 const RULE_DEF = { clrIn: 3.5, shellIn: 6, floorK: 0.10, noseK: 1.4, tailK: 2.5, overlapK: 1.4, aftLen: 2.5, aftFront: false,
                    exitAuto: true, exitIn: 10, wingPos: 0.42, owX: 0, owGap: 1, seatIn: 18, armIn: 2, pitchIn: 31, lavPer: 50, doorPlan: null, doorI: 'I' };
 let P = Object.assign({}, DEF), activePreset = null, RES = null;
+
+/* 캔버스 색: CSS 변수는 캔버스에서 쓸 수 없어 팔레트를 따로 둔다. 라이트 모드는 글자를 모두 어두운 색으로 (밝은 회색·흰색 글자 없음) */
+const THEMES = {
+  dark: { txt: '#cbd5e1', strong: '#e2e8f0', mut: '#8b9ab0', faint: '#4b5d77', dim: '#7f93ad', fwd: '#64748b', grid: '#1b2638',
+    wingLine: '#51627b', wingLab: '#64748b', hull: '#18222f', hullLine: '#6b7f9c', cockFill: '#7dd3fc55', cockLine: '#7dd3fc',
+    cabin: '#0d1520', cabinDash: '#3a4a62', aisleFill: 'rgba(226,232,240,.13)', aisleLine: 'rgba(226,232,240,.22)', aisleSub: 'rgba(226,232,240,.10)',
+    mod: '#162030', bay: '#1a2433', modLine: '#2b3a50', vest: 'rgba(253,230,138,.13)', slackTxt: '#94a3b8', arm: '#94a3b8', rowNum: '#e2e8f0',
+    exitPath: 'rgba(253,230,138,.30)', exitTxt: '#4ade80', exitSub: '#86efac',
+    shellFill: '#1d2a3b', shellLine: '#7287a6', inner: '#0d1520', innerLine: '#415671', cargo: '#080d14', cargoTxt: '#4b5d77', floor: '#334156', cross: '#25324a',
+    aisleBand: 'rgba(253,230,138,.12)', aisleBandLine: 'rgba(253,230,138,.55)', aisleTxt: '#fde68a', dc: '#9fb0c6', callout: '#64748b', center: '#6b7f9c', diTxt: '#7dd3fc', red: '#f87171' },
+  light: { txt: '#1e293b', strong: '#0f172a', mut: '#475569', faint: '#475569', dim: '#475569', fwd: '#475569', grid: '#e2e8f0',
+    wingLine: '#94a3b8', wingLab: '#475569', hull: '#eef2f7', hullLine: '#64748b', cockFill: '#0ea5e955', cockLine: '#0284c7',
+    cabin: '#ffffff', cabinDash: '#94a3b8', aisleFill: 'rgba(71,85,105,.12)', aisleLine: 'rgba(71,85,105,.30)', aisleSub: 'rgba(71,85,105,.08)',
+    mod: '#e9eef5', bay: '#dde5ef', modLine: '#b6c2d2', vest: 'rgba(217,119,6,.16)', slackTxt: '#475569', arm: '#64748b', rowNum: '#1e293b',
+    exitPath: 'rgba(217,119,6,.28)', exitTxt: '#15803d', exitSub: '#166534',
+    shellFill: '#cbd5e1', shellLine: '#64748b', inner: '#ffffff', innerLine: '#94a3b8', cargo: '#e2e8f0', cargoTxt: '#475569', floor: '#94a3b8', cross: '#cbd5e1',
+    aisleBand: 'rgba(217,119,6,.14)', aisleBandLine: 'rgba(180,83,9,.75)', aisleTxt: '#92400e', dc: '#475569', callout: '#475569', center: '#475569', diTxt: '#0369a1', red: '#dc2626' }
+};
+let TH = THEMES.dark, themePref = 'auto';
+const lightMQ = window.matchMedia ? matchMedia('(prefers-color-scheme: light)') : null;
+function applyTheme(pref, save) {
+  themePref = pref;
+  const eff = pref === 'auto' ? (lightMQ && lightMQ.matches ? 'light' : 'dark') : pref;
+  document.documentElement.setAttribute('data-theme', eff); TH = THEMES[eff];
+  if (save) { try { localStorage.setItem('cabinSimTheme', pref); } catch (e) {} }
+  document.querySelectorAll('#themeSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === pref));
+  dirty = true;
+}
 
 /* ---------------------------------------------------------------------
    1. 단면 사이징
@@ -762,14 +819,56 @@ function syncControls() {
   $('#exitAuto').checked = P.exitAuto; $('#autoLayout').checked = P.autoLayout; $('#aftFront').checked = P.aftFront;
   const pl = planOf(P); $('#planInfo').style.display = pl ? '' : 'none';
   if (pl) $('#planTxt').textContent = `— 공식 도면 ${pl.length}쌍(${pl.map(d => d.x.toFixed(2) + ' m ' + d.t).join(' · ')})${RES && RES.c.plan ? '' : ' · 현재 행 수 부족 또는 60 ft 초과로 미적용'}`;
-  setSeg('#bodySeg', P.body);
+  syncPresetUI();
 }
-function setSeg(sel, v) { document.querySelectorAll(sel + ' button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
-function bindSeg(sel, fn) { document.querySelectorAll(sel + ' button').forEach(b => b.addEventListener('click', () => fn(b.dataset.v))); }
+let uiMaker = MAKERS[0];
+function fillModels(maker) {
+  const sel = $('#modelSel'), list = PRESETS.filter(p => p.maker === maker);
+  sel.innerHTML = '';
+  if (!list.length) { sel.add(new Option('---', '')); sel.options[0].disabled = true; return; }      // 아직 프리셋이 없는 제작사: 항목만 표시
+  sel.add(new Option('기종 선택…', ''));
+  [...new Set(list.map(p => p.fam))].forEach(f => {
+    const g = document.createElement('optgroup'); g.label = f;
+    list.filter(p => p.fam === f).forEach(p => g.appendChild(new Option(p.name + (p.cal ? ' · 보정' : ''), p.id)));
+    sel.appendChild(g);
+  });
+}
+let lastPsId = null;
+function syncPresetUI() {
+  const ps = PRESETS.find(p => p.id === activePreset);
+  if (ps && ps.id !== lastPsId && uiMaker !== ps.maker) { uiMaker = ps.maker; fillModels(uiMaker); }   // 프리셋이 바뀐 때만 제작사 선택을 따라감
+  lastPsId = ps ? ps.id : null;
+  const shown = ps && ps.maker === uiMaker ? ps : null;
+  $('#makerSel').value = uiMaker; $('#modelSel').value = shown ? shown.id : '';
+  $('#presetInfo').textContent = shown ? `전장 ${ps.L} m · 외경 ${ps.Do} m · 최대 객실 폭 ${ps.Wcab} m${ps.cal ? ' · 공식 도면 보정값 적용' : ''}`
+    : (PRESETS.some(p => p.maker === uiMaker) ? '기종을 고르면 공식 전장·외경과 보정값을 불러옵니다. 오차는 우측 하단 표에서 확인하세요.' : '이 제작사의 기종 데이터는 아직 준비 중입니다.');
+}
+function fillLayoutSel() {
+  /* 동체 형식 + 좌석 배열을 한 목록으로: 항목마다 열 수와 필요 외경, 동체 주도에서는 현재 외경에 들어가는지(✓/✗) */
+  const sel = $('#layoutSel'); sel.innerHTML = '';
+  ['narrow', 'wide'].forEach(body => {
+    const g = document.createElement('optgroup'); g.label = body === 'narrow' ? '협동체 (통로 1개)' : '광동체 (통로 2개)';
+    const cfg = body === P.body ? P : Object.assign({}, P, { aisleIn: BODY_DEF[body].aisle, shellIn: BODY_DEF[body].shell });
+    LAYOUTS[body].forEach(l => {
+      const xr = cross(parse(l), cfg, null), fuseHere = P.mode === 'fuse' && body === P.body;
+      g.appendChild(new Option(`${l} · ${sum(parse(l))}열 · 외경 ${f2(xr.DoReq)} m${fuseHere ? (xr.DoReq <= P.fuseD + 1e-9 ? ' ✓' : ' ✗') : ''}`, `${body}|${l}`));
+    });
+    sel.appendChild(g);
+  });
+  sel.value = `${P.body}|${RES.layoutStr}`;
+}
+function pickLayout(body, ls) {
+  /* 배열을 직접 고르면 현재 기준 유지: 좌석 주도면 승객 수를 이 배열의 범위로 제한, 동체 주도면 배열 고정. 형식이 바뀌면 형식 기본값 적용 */
+  if (body !== P.body) setBody(body);
+  P.base = null; P.layout = ls; activePreset = null; view.auto = true;
+  if (P.mode === 'fuse') P.autoLayout = false;
+  else { const cap = layoutCap(P, ls); P.pax = clamp(P.pax, cap.paxMin, Math.max(cap.paxMin, cap.paxMax)); }
+}
 
 function setBody(b) {
   /* 형식을 직접 바꾸면 승객 수는 유지하되 새 형식이 수용하는 범위로 제한 */
   const pax = P.pax;
+  if (activePreset) CAL_KEYS.forEach(k => { P[k] = DEF[k]; });   // 프리셋의 보정값은 다른 형식에 맞지 않으므로 기본값으로
   Object.assign(P, { mode: 'seat', basis: 'pax', base: null, body: b, layout: DEF_LAYOUT[b], aisleIn: BODY_DEF[b].aisle, shellIn: BODY_DEF[b].shell, doorPlan: null });
   const cap = layoutCap(P, P.layout); P.pax = clamp(pax, cap.paxMin, cap.paxMax);
   activePreset = null; view.auto = true;
@@ -830,7 +929,7 @@ function rrPath(c2, x, y, w, h, r) {
   c2.arcTo(x + w, y, x + w, y + h, r); c2.arcTo(x + w, y + h, x, y + h, r); c2.arcTo(x, y + h, x, y, r); c2.arcTo(x, y, x + w, y, r); c2.closePath();
 }
 function txt(t, x, y, o = {}) {
-  ctx.font = `${o.bold ? '600 ' : ''}${o.size || 11}px ${FONT}`; ctx.fillStyle = o.color || '#cbd5e1';
+  ctx.font = `${o.bold ? '600 ' : ''}${o.size || 11}px ${FONT}`; ctx.fillStyle = o.color || TH.txt;
   ctx.textAlign = o.align || 'center'; ctx.textBaseline = o.base || 'middle'; ctx.fillText(t, x, y);
 }
 function fr(x0, v0, x1, v1, col) { ctx.fillStyle = col; ctx.fillRect(wx(x0), wy(v0), (x1 - x0) * view.s, (v1 - v0) * view.s); }
@@ -857,26 +956,26 @@ function drawLopa() {
 
   /* 눈금자 (상단) */
   const step = [1, 2, 5, 10, 20, 50].find(k => k * s >= 60) || 50;
-  ctx.strokeStyle = '#1b2638'; ctx.lineWidth = 1; ctx.beginPath();
+  ctx.strokeStyle = TH.grid; ctx.lineWidth = 1; ctx.beginPath();
   for (let m = 0; m <= R.Lf + 1; m += step) { const px = wx(m); ctx.moveTo(px, 0); ctx.lineTo(px, h); }
   ctx.stroke();
-  for (let m = 0; m <= R.Lf + 1; m += step) txt(`${m} m`, wx(m) + 3, 46, { size: 10, color: '#4b5d77', align: 'left' });
+  for (let m = 0; m <= R.Lf + 1; m += step) txt(`${m} m`, wx(m) + 3, 46, { size: 10, color: TH.faint, align: 'left' });
 
   /* 주익 (참고) */
   const wg = wingGeom(R);
-  ctx.save(); ctx.setLineDash([6, 4]); ctx.strokeStyle = '#51627b'; ctx.fillStyle = 'rgba(100,116,139,.10)'; ctx.lineWidth = 1.2;
+  ctx.save(); ctx.setLineDash([6, 4]); ctx.strokeStyle = TH.wingLine; ctx.fillStyle = 'rgba(100,116,139,.10)'; ctx.lineWidth = 1.2;
   [-1, 1].forEach(sg => {
     ctx.beginPath(); wg.poly.forEach((p, i) => { const px = wx(p[0]), py = wy(sg * p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
     ctx.closePath(); ctx.fill(); ctx.stroke();
   });
   ctx.restore();
-  txt('주익 (참고)', wx((wg.poly[1][0] + wg.poly[3][0]) / 2 + 0.3), wy(-(R.Ro + wg.sp * 0.9)), { size: 10.5, color: '#64748b' });
+  txt('주익 (참고)', wx((wg.poly[1][0] + wg.poly[3][0]) / 2 + 0.3), wy(-(R.Ro + wg.sp * 0.9)), { size: 10.5, color: TH.wingLab });
 
   /* 동체 외피 */
-  fuselagePath(R, ctx); ctx.fillStyle = '#18222f'; ctx.fill(); ctx.strokeStyle = '#6b7f9c'; ctx.lineWidth = 2; ctx.stroke();
+  fuselagePath(R, ctx); ctx.fillStyle = TH.hull; ctx.fill(); ctx.strokeStyle = TH.hullLine; ctx.lineWidth = 2; ctx.stroke();
   /* 조종실 창 */
   const wxA = 0.50 * R.Ln, wxB = 0.76 * R.Ln;
-  ctx.fillStyle = '#7dd3fc55'; ctx.strokeStyle = '#7dd3fc'; ctx.lineWidth = 1;
+  ctx.fillStyle = TH.cockFill; ctx.strokeStyle = TH.cockLine; ctx.lineWidth = 1;
   [-1, 1].forEach(sg => {
     ctx.beginPath(); ctx.moveTo(wx(wxA), wy(sg * 0.08 * R.Ro)); ctx.lineTo(wx(wxB), wy(sg * 0.40 * R.Ro)); ctx.lineTo(wx(wxB + 0.0), wy(sg * 0.60 * R.Ro));
     ctx.lineTo(wx(wxA - 0.05 * R.Ln), wy(sg * 0.30 * R.Ro)); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -885,8 +984,8 @@ function drawLopa() {
 
   /* 내부 객실 */
   ctx.save(); fuselagePath(R, ctx); ctx.clip();
-  fr(x0, -X.W / 2, x0 + c.L, X.W / 2, '#0d1520');
-  ctx.strokeStyle = '#3a4a62'; ctx.setLineDash([5, 4]); ctx.lineWidth = 1;
+  fr(x0, -X.W / 2, x0 + c.L, X.W / 2, TH.cabin);
+  ctx.strokeStyle = TH.cabinDash; ctx.setLineDash([5, 4]); ctx.lineWidth = 1;
   [-X.a, X.a].forEach(v => { ctx.beginPath(); ctx.moveTo(wx(x0), wy(v)); ctx.lineTo(wx(x0 + c.L), wy(v)); ctx.stroke(); });
   ctx.setLineDash([]);
 
@@ -897,8 +996,8 @@ function drawLopa() {
 
   /* 통로 (탈출 경로) */
   X.aisles.forEach(a => {
-    fr(x0, a.v0, x0 + c.L, a.v1, 'rgba(226,232,240,.13)');
-    ctx.strokeStyle = 'rgba(226,232,240,.22)'; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.moveTo(wx(x0), wy((a.v0 + a.v1) / 2)); ctx.lineTo(wx(x0 + c.L), wy((a.v0 + a.v1) / 2)); ctx.stroke(); ctx.setLineDash([]);
+    fr(x0, a.v0, x0 + c.L, a.v1, TH.aisleFill);
+    ctx.strokeStyle = TH.aisleLine; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.moveTo(wx(x0), wy((a.v0 + a.v1) / 2)); ctx.lineTo(wx(x0 + c.L), wy((a.v0 + a.v1) / 2)); ctx.stroke(); ctx.setLineDash([]);
     hits.push({ x0, x1: x0 + c.L, v0: a.v0, v1: a.v1, tip: `통로 폭 ${(R.P.aisleIn).toFixed(1)} in (${(R.P.aisleIn * IN).toFixed(3)} m)\n25.815 최소 20 in (25 in 이상 높이)` });
   });
 
@@ -906,10 +1005,10 @@ function drawLopa() {
   const names = { fwd: '전방', aft: '후방', mid: '중앙' };
   c.mods.forEach((m, idx) => {
     const bx0 = x0 + m.s0, bx1 = x0 + m.s1;
-    fr(bx0, -X.W / 2, bx1, X.W / 2, m.kind === 'bay' ? '#1a2433' : '#162030');
-    ctx.strokeStyle = '#2b3a50'; ctx.lineWidth = 1; ctx.strokeRect(wx(bx0), wy(-X.W / 2), (bx1 - bx0) * s, X.W * s);
-    X.aisles.forEach(a => fr(bx0, a.v0, bx1, a.v1, 'rgba(226,232,240,.10)'));
-    if (m.vest) fr(x0 + m.vest[0], -X.W / 2, x0 + m.vest[1], X.W / 2, 'rgba(253,230,138,.13)');
+    fr(bx0, -X.W / 2, bx1, X.W / 2, m.kind === 'bay' ? TH.bay : TH.mod);
+    ctx.strokeStyle = TH.modLine; ctx.lineWidth = 1; ctx.strokeRect(wx(bx0), wy(-X.W / 2), (bx1 - bx0) * s, X.W * s);
+    X.aisles.forEach(a => fr(bx0, a.v0, bx1, a.v1, TH.aisleSub));
+    if (m.vest) fr(x0 + m.vest[0], -X.W / 2, x0 + m.vest[1], X.W / 2, TH.vest);
     m.cells.forEach(ce => {
       const lav = ce.t === 'lav', col = lav ? '#22d3ee' : '#f59e0b';
       const px = wx(x0 + ce.x0) + 1.5, py = wy(ce.v0) + 1.5, pw = (ce.x1 - ce.x0) * s - 3, ph = (ce.v1 - ce.v0) * s - 3;
@@ -920,7 +1019,7 @@ function drawLopa() {
       hits.push({ x0: x0 + ce.x0, x1: x0 + ce.x1, v0: ce.v0, v1: ce.v1, tip: `${names[m.kind] || '도어'} ${lav ? '화장실 (Lavatory)' : '갤리 (Galley)'}\n모듈 길이 ${(m.s1 - m.s0).toFixed(2)} m` });
     });
     const label = m.kind === 'bay' ? '도어 베이' : `${names[m.kind]} 서비스 모듈`;
-    if ((bx1 - bx0) * s > 54) txt(label, wx((bx0 + bx1) / 2), wy(-X.W / 2) + 9, { size: 10, color: '#8b9ab0' });
+    if ((bx1 - bx0) * s > 54) txt(label, wx((bx0 + bx1) / 2), wy(-X.W / 2) + 9, { size: 10, color: TH.mut });
     const lab = m.kind === 'fwd' ? '전방 갤리·화장실' : m.kind === 'aft' ? '후방 갤리·화장실' : m.kind === 'mid' ? '중앙 갤리·화장실' : '도어 베이';
     hits.push({ x0: bx0, x1: bx1, v0: -X.W / 2, v1: X.W / 2, tip: `${lab}\n길이 ${(m.s1 - m.s0).toFixed(2)} m${m.vest ? '\n비상 도어 베스티뷸 포함' : ''}${m.lav != null ? `\n화장실 ${m.lav} · 갤리 ${m.gal}` : ''}` });
   });
@@ -928,7 +1027,7 @@ function drawLopa() {
   /* 미사용 길이 (동체 주도) */
   if (c.slackIv) {
     hatch(x0 + c.slackIv[0], -X.W / 2, x0 + c.slackIv[1], X.W / 2, 'rgba(148,163,184,.30)');
-    if ((c.slackIv[1] - c.slackIv[0]) * s > 80) txt(`미사용 길이 ${(c.slackIv[1] - c.slackIv[0]).toFixed(2)} m`, wx(x0 + (c.slackIv[0] + c.slackIv[1]) / 2), wy(0), { size: 11, color: '#94a3b8' });
+    if ((c.slackIv[1] - c.slackIv[0]) * s > 80) txt(`미사용 길이 ${(c.slackIv[1] - c.slackIv[0]).toFixed(2)} m`, wx(x0 + (c.slackIv[0] + c.slackIv[1]) / 2), wy(0), { size: 11, color: TH.slackTxt });
     hits.push({ x0: x0 + c.slackIv[0], x1: x0 + c.slackIv[1], v0: -X.W / 2, v1: X.W / 2, tip: `미사용 길이 ${(c.slackIv[1] - c.slackIv[0]).toFixed(2)} m\n한 행을 더 넣기에는 부족한 구간` });
   }
 
@@ -941,7 +1040,7 @@ function drawLopa() {
     const sx0 = x0 + rw.s0, sx1 = sx0 + rw.depth;
     if (wx(sx1) < -20 || wx(sx0) > w + 20) return;
     X.els.forEach(e => {
-      if (e.t === 'arm') { if (detail) fr(sx0 + rw.depth * 0.12, e.v0, sx1 - rw.depth * 0.05, e.v1, '#94a3b8'); return; }
+      if (e.t === 'arm') { if (detail) fr(sx0 + rw.depth * 0.12, e.v0, sx1 - rw.depth * 0.05, e.v1, TH.arm); return; }
       const px = wx(sx0), py = wy(e.v0) + 0.5, pw = rw.depth * s, ph = (e.v1 - e.v0) * s - 1;
       ctx.fillStyle = rw.exit ? '#5b8cff' : '#2f6df0';
       if (detail) { rrPath(ctx, px, py, pw, ph, Math.min(4, pw / 4)); ctx.fill(); ctx.fillStyle = rw.exit ? '#3d63c9' : '#2250c0'; ctx.fillRect(px + pw * 0.74, py + 1, pw * 0.26, ph - 2); }
@@ -954,12 +1053,12 @@ function drawLopa() {
       const cx = (gx0 + gx1) / 2;
       [X.regions[0], X.regions[X.regions.length - 1]].forEach((rg, i) => {
         const v0 = i === 0 ? rg.v0 : rg.v0, v1 = rg.v1;
-        fr(cx - pw2 / 2, v0, cx + pw2 / 2, v1, 'rgba(253,230,138,.30)');
+        fr(cx - pw2 / 2, v0, cx + pw2 / 2, v1, TH.exitPath);
       });
     }
     /* 행 번호 */
     if (rw.n % rowStep === 0 || rw.n === 1) {
-      X.aisles.forEach(a => txt(String(rw.n), wx(sx0 + rw.depth / 2), wy((a.v0 + a.v1) / 2), { size: Math.min(11, Math.max(8, s * 0.32)), color: '#e2e8f0' }));
+      X.aisles.forEach(a => txt(String(rw.n), wx(sx0 + rw.depth / 2), wy((a.v0 + a.v1) / 2), { size: Math.min(11, Math.max(8, s * 0.32)), color: TH.rowNum }));
     }
     hits.push({ x0: sx0, x1: x0 + rw.s1, v0: -X.W / 2, v1: X.W / 2, row: rw });
   });
@@ -977,8 +1076,8 @@ function drawLopa() {
       ctx.strokeStyle = '#22c55e'; ctx.fillStyle = '#22c55e'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(sx, sy + sg * 4); ctx.lineTo(sx, sy + sg * len); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(sx, sy + sg * (len + 6)); ctx.lineTo(sx - 5, sy + sg * (len - 3)); ctx.lineTo(sx + 5, sy + sg * (len - 3)); ctx.closePath(); ctx.fill();
-      if (showExit) txt('EXIT', sx, sy + sg * (len + 16), { size: 10.5, color: '#4ade80', bold: true });
-      if (showSub) txt(e.kind === 'ow' ? '오버윙 비상구' : '비상탈출구', sx + (e.kind === 'ow' ? w0 * s * 0.5 : 0), sy + sg * (len + 28), { size: 9.5, color: '#86efac' });
+      if (showExit) txt('EXIT', sx, sy + sg * (len + 16), { size: 10.5, color: TH.exitTxt, bold: true });
+      if (showSub) txt(e.kind === 'ow' ? '오버윙 비상구' : '비상탈출구', sx + (e.kind === 'ow' ? w0 * s * 0.5 : 0), sy + sg * (len + 28), { size: 9.5, color: TH.exitSub });
     });
     const T = TYPE[e.type];
     hits.push({ x0: ex - w0 / 2 - 0.1, x1: ex + w0 / 2 + 0.1, v0: -hh - 1.2, v1: -hh + 0.4, tip: exitTip(e, T) });
@@ -987,15 +1086,15 @@ function drawLopa() {
 
   /* 치수선 */
   const by = wy(R.Ro + wg.sp) + 30;
-  const colD = '#7f93ad';
+  const colD = TH.dim;
   dimH(0, R.Ln, by, `기수 ${R.Ln.toFixed(1)} m`, colD);
   dimH(R.Ln, R.Ln + c.L, by, `객실 ${c.L.toFixed(1)} m`, colD);
   dimH(R.Lf - R.Lt, R.Lf, by + 20, `꼬리 ${R.Lt.toFixed(1)} m (객실 중첩 ${R.ov.toFixed(1)} m)`, colD);
-  dimH(0, R.Lf, by + 40, `전장 L = ${R.Lf.toFixed(2)} m`, '#cbd5e1');
+  dimH(0, R.Lf, by + 40, `전장 L = ${R.Lf.toFixed(2)} m`, TH.strong);
   const vx = wx(R.Lf) + 22;
   ctx.strokeStyle = colD; ctx.beginPath(); ctx.moveTo(vx, wy(-R.Ro)); ctx.lineTo(vx, wy(R.Ro)); ctx.moveTo(vx - 4, wy(-R.Ro)); ctx.lineTo(vx + 4, wy(-R.Ro)); ctx.moveTo(vx - 4, wy(R.Ro)); ctx.lineTo(vx + 4, wy(R.Ro)); ctx.stroke();
-  ctx.save(); ctx.translate(vx + 10, wy(0)); ctx.rotate(-Math.PI / 2); txt(`외경 D = ${R.Do.toFixed(2)} m`, 0, 0, { size: 11, color: '#cbd5e1' }); ctx.restore();
-  txt('◀ 전방', wx(0) + 4, wy(-R.Ro) - 14, { size: 11, color: '#64748b', align: 'left' });
+  ctx.save(); ctx.translate(vx + 10, wy(0)); ctx.rotate(-Math.PI / 2); txt(`외경 D = ${R.Do.toFixed(2)} m`, 0, 0, { size: 11, color: TH.strong }); ctx.restore();
+  txt('◀ 전방', wx(0) + 4, wy(-R.Ro) - 14, { size: 11, color: TH.fwd, align: 'left' });
 }
 function exitTip(e, T) {
   return `${e.kind === 'ow' ? '오버윙 비상구' : '비상탈출구'} (${T.nm}) · 좌/우 1쌍\n개구부 ${T.w}×${T.h} in\n개소당 좌석 상한 ${T.cap}석 (25.807(g))`;
@@ -1055,7 +1154,7 @@ $('#zout').onclick = () => zoomAt(cv.clientWidth / 2, cv.clientHeight / 2, 1 / 1
    --------------------------------------------------------------------- */
 const xv = $('#xsec'), xc = xv.getContext('2d');
 function xt(t, x, y, o = {}) {
-  xc.font = `${o.bold ? '600 ' : ''}${o.size || 11}px ${FONT}`; xc.fillStyle = o.color || '#cbd5e1'; xc.textAlign = o.align || 'center'; xc.textBaseline = o.base || 'middle'; xc.fillText(t, x, y);
+  xc.font = `${o.bold ? '600 ' : ''}${o.size || 11}px ${FONT}`; xc.fillStyle = o.color || TH.txt; xc.textAlign = o.align || 'center'; xc.textBaseline = o.base || 'middle'; xc.fillText(t, x, y);
 }
 function drawCross() {
   resize(xv, xc);
@@ -1065,34 +1164,34 @@ function drawCross() {
   const sc = Math.min((w - 150) / outerW, (h - 190) / outerH);
   const ox = w / 2 - 6, oy = 46 + outerH * sc / 2, floorY = oy + X.f * sc;
   const SX = v => ox + v * sc, SZ = z => floorY - z * sc;
-  const red = '#f87171';
+  const red = TH.red;
 
   /* 외피 · 내벽 */
   xc.beginPath(); xc.ellipse(ox, oy, (X.a + X.shell) * sc, (X.b + X.shell) * sc, 0, 0, Math.PI * 2);
-  xc.fillStyle = '#1d2a3b'; xc.fill(); xc.strokeStyle = R.noFit ? red : '#7287a6'; xc.lineWidth = 2; if (R.noFit) xc.setLineDash([6, 4]); xc.stroke(); xc.setLineDash([]);
+  xc.fillStyle = TH.shellFill; xc.fill(); xc.strokeStyle = R.noFit ? red : TH.shellLine; xc.lineWidth = 2; if (R.noFit) xc.setLineDash([6, 4]); xc.stroke(); xc.setLineDash([]);
   xc.beginPath(); xc.ellipse(ox, oy, X.a * sc, X.b * sc, 0, 0, Math.PI * 2);
-  xc.fillStyle = '#0d1520'; xc.fill(); xc.strokeStyle = '#415671'; xc.lineWidth = 1; xc.stroke();
+  xc.fillStyle = TH.inner; xc.fill(); xc.strokeStyle = TH.innerLine; xc.lineWidth = 1; xc.stroke();
   /* 하부 화물칸 (참고) */
   xc.save(); xc.beginPath(); xc.ellipse(ox, oy, X.a * sc, X.b * sc, 0, 0, Math.PI * 2); xc.clip();
-  xc.fillStyle = '#080d14'; xc.fillRect(0, floorY + 0.12 * sc, w, h);
-  xt('하부 화물칸 (참고)', ox, floorY + 0.12 * sc + (oy + X.b * sc - floorY) / 2 + 2, { size: 10.5, color: '#4b5d77' });
+  xc.fillStyle = TH.cargo; xc.fillRect(0, floorY + 0.12 * sc, w, h);
+  xt('하부 화물칸 (참고)', ox, floorY + 0.12 * sc + (oy + X.b * sc - floorY) / 2 + 2, { size: 10.5, color: TH.cargoTxt });
   xc.restore();
   /* 바닥 */
   const chord = Math.sqrt(Math.max(0, 1 - (X.f / X.b) ** 2)) * X.a;
-  xc.fillStyle = '#334156'; xc.fillRect(SX(-chord), floorY, 2 * chord * sc, 0.12 * sc);
-  xc.strokeStyle = '#25324a'; xc.setLineDash([3, 4]); xc.beginPath(); xc.moveTo(ox, oy - 8); xc.lineTo(ox, oy + 8); xc.moveTo(ox - 8, oy); xc.lineTo(ox + 8, oy); xc.stroke(); xc.setLineDash([]);
+  xc.fillStyle = TH.floor; xc.fillRect(SX(-chord), floorY, 2 * chord * sc, 0.12 * sc);
+  xc.strokeStyle = TH.cross; xc.setLineDash([3, 4]); xc.beginPath(); xc.moveTo(ox, oy - 8); xc.lineTo(ox, oy + 8); xc.moveTo(ox - 8, oy); xc.lineTo(ox + 8, oy); xc.stroke(); xc.setLineDash([]);
 
   /* 통로 · 팔걸이 · 좌석 */
   const inside = (v, z) => (v / X.a) ** 2 + ((z - X.f) / X.b) ** 2 <= 1.0001;
   X.aisles.forEach(a => {
-    xc.fillStyle = 'rgba(253,230,138,.12)'; xc.fillRect(SX(a.v0), SZ(1.9), (a.v1 - a.v0) * sc, 1.9 * sc);
-    xc.strokeStyle = 'rgba(253,230,138,.55)'; xc.setLineDash([3, 3]); xc.strokeRect(SX(a.v0), SZ(1.9), (a.v1 - a.v0) * sc, 1.9 * sc); xc.setLineDash([]);
-    xt('통로', SX((a.v0 + a.v1) / 2), SZ(1.05), { size: 10, color: '#fde68a' });
-    xt(`${R.P.aisleIn.toFixed(0)} in`, SX((a.v0 + a.v1) / 2), SZ(1.05) + 12, { size: 10, color: '#fde68a' });
+    xc.fillStyle = TH.aisleBand; xc.fillRect(SX(a.v0), SZ(1.9), (a.v1 - a.v0) * sc, 1.9 * sc);
+    xc.strokeStyle = TH.aisleBandLine; xc.setLineDash([3, 3]); xc.strokeRect(SX(a.v0), SZ(1.9), (a.v1 - a.v0) * sc, 1.9 * sc); xc.setLineDash([]);
+    xt('통로', SX((a.v0 + a.v1) / 2), SZ(1.05), { size: 10, color: TH.aisleTxt });
+    xt(`${R.P.aisleIn.toFixed(0)} in`, SX((a.v0 + a.v1) / 2), SZ(1.05) + 12, { size: 10, color: TH.aisleTxt });
   });
   X.els.forEach(e => {
     const bad = !inside(e.t === 'seat' ? (Math.abs(e.v0) > Math.abs(e.v1) ? e.v0 : e.v1) : (Math.abs(e.v0) > Math.abs(e.v1) ? e.v0 : e.v1), ARM_H);
-    if (e.t === 'arm') { xc.fillStyle = bad ? red : '#94a3b8'; xc.fillRect(SX(e.v0), SZ(ARM_H), (e.v1 - e.v0) * sc, ARM_H * sc); }
+    if (e.t === 'arm') { xc.fillStyle = bad ? red : TH.arm; xc.fillRect(SX(e.v0), SZ(ARM_H), (e.v1 - e.v0) * sc, ARM_H * sc); }
     else {
       xc.fillStyle = bad ? '#b91c1c' : '#2f6df0'; xc.fillRect(SX(e.v0), SZ(0.45), (e.v1 - e.v0) * sc, 0.45 * sc);
       const m = (e.v1 - e.v0) * 0.1; xc.fillStyle = bad ? '#991b1b' : '#2250c0'; xc.fillRect(SX(e.v0 + m), SZ(1.12), (e.v1 - e.v0 - 2 * m) * sc, 0.67 * sc);
@@ -1100,25 +1199,25 @@ function drawCross() {
   });
 
   /* 치수선 */
-  const dc = '#9fb0c6';
+  const dc = TH.dc;
   const hl = (v0, v1, y, label, col = dc) => {
     xc.strokeStyle = col; xc.lineWidth = 1; xc.beginPath(); xc.moveTo(SX(v0), y); xc.lineTo(SX(v1), y); xc.moveTo(SX(v0), y - 4); xc.lineTo(SX(v0), y + 4); xc.moveTo(SX(v1), y - 4); xc.lineTo(SX(v1), y + 4); xc.stroke();
     xt(label, SX((v0 + v1) / 2), y - 9, { size: 11, color: col });
   };
-  hl(-X.Do / 2, X.Do / 2, oy - outerH * sc / 2 - 12, `외경 D = ${X.Do.toFixed(2)} m`, '#e2e8f0');
+  hl(-X.Do / 2, X.Do / 2, oy - outerH * sc / 2 - 12, `외경 D = ${X.Do.toFixed(2)} m`, TH.strong);
   /* 쉘 두께 콜아웃 */
   const sxL = ox - (X.a + X.shell / 2) * sc * Math.cos(0.5), syL = oy - (X.b + X.shell / 2) * sc * Math.sin(0.5);
-  xc.strokeStyle = '#64748b'; xc.beginPath(); xc.moveTo(sxL, syL); xc.lineTo(sxL - 22, syL - 16); xc.stroke();
-  xt(`쉘 ${R.P.shellIn.toFixed(1)} in`, sxL - 24, syL - 20, { size: 10.5, align: 'right', color: '#cbd5e1' });
+  xc.strokeStyle = TH.callout; xc.beginPath(); xc.moveTo(sxL, syL); xc.lineTo(sxL - 22, syL - 16); xc.stroke();
+  xt(`쉘 ${R.P.shellIn.toFixed(1)} in`, sxL - 24, syL - 20, { size: 10.5, align: 'right', color: TH.strong });
   /* 높이 치수 */
   const vx = ox + (X.a + X.shell) * sc + 18;
   xc.strokeStyle = dc; xc.beginPath(); xc.moveTo(vx, floorY); xc.lineTo(vx, oy - X.b * sc); xc.moveTo(vx - 4, floorY); xc.lineTo(vx + 4, floorY); xc.moveTo(vx - 4, oy - X.b * sc); xc.lineTo(vx + 4, oy - X.b * sc); xc.stroke();
   xt(`H ${(X.f + X.b).toFixed(2)} m`, vx + 6, (floorY + oy - X.b * sc) / 2, { size: 10.5, align: 'left' });
-  xt('(중심선)', vx + 6, (floorY + oy - X.b * sc) / 2 + 13, { size: 9.5, align: 'left', color: '#6b7f9c' });
+  xt('(중심선)', vx + 6, (floorY + oy - X.b * sc) / 2 + 13, { size: 9.5, align: 'left', color: TH.center });
 
   /* 하단 가로 구성 띠: 여유 · 팔걸이 · 좌석 · 통로 — 전체 길이 = 객실 폭 W */
   const by = oy + outerH * sc / 2 + 26;
-  xt('가로 구성 (in)', SX(-X.W / 2), by - 11, { size: 10, color: '#8b9ab0', align: 'left' });
+  xt('가로 구성 (in)', SX(-X.W / 2), by - 11, { size: 10, color: TH.mut, align: 'left' });
   let v = -X.W / 2;
   const seg = (len, col, lab) => {
     const px = SX(v), pw = len * sc; xc.fillStyle = col; xc.fillRect(px, by, pw - 0.6, 16);
@@ -1132,8 +1231,8 @@ function drawCross() {
   });
   seg(X.clr, '#475569', (R.P.clrIn).toFixed(1));
   hl(-X.W / 2, X.W / 2, by + 34, `객실 폭 W = ${X.W.toFixed(2)} m`);
-  xt(`내경 Di = ${X.Di.toFixed(2)} m  (곡률 보정 ${X.margin >= 0 ? '+' : '−'}${Math.abs(X.margin * 100).toFixed(0)} cm)`, ox, by + 56, { size: 10.5, color: '#7dd3fc' });
-  xt(`여유 ${R.P.clrIn.toFixed(1)} · 팔걸이 ${R.P.armIn.toFixed(1)} · 좌석 ${R.P.seatIn.toFixed(1)} · 통로 ${R.P.aisleIn.toFixed(1)} (in)`, ox, by + 72, { size: 10.5, color: '#8b9ab0' });
+  xt(`내경 Di = ${X.Di.toFixed(2)} m  (곡률 보정 ${X.margin >= 0 ? '+' : '−'}${Math.abs(X.margin * 100).toFixed(0)} cm)`, ox, by + 56, { size: 10.5, color: TH.diTxt });
+  xt(`여유 ${R.P.clrIn.toFixed(1)} · 팔걸이 ${R.P.armIn.toFixed(1)} · 좌석 ${R.P.seatIn.toFixed(1)} · 통로 ${R.P.aisleIn.toFixed(1)} (in)`, ox, by + 72, { size: 10.5, color: TH.mut });
   if (R.noFit) xt('⚠ 입력 직경에 배열이 들어가지 않습니다 (빨간색 = 단면 초과)', ox, by + 90, { size: 11, color: red });
 }
 
@@ -1184,27 +1283,13 @@ function updatePanels() {
 
   $('#rules').innerHTML = R.checks.map(k => `<li class="${k.st}" title="${k.ref}"><span class="dot"></span><div><div class="t">${k.title}</div><div class="dtl">${k.detail}</div><div class="ref">${k.ref}</div></div></li>`).join('');
 
-  /* 레이아웃 핀 */
-  const pills = $('#layoutPills'); pills.innerHTML = '';
-  LAYOUTS[P.body].forEach(ls => {
-    const b = document.createElement('button'); b.className = 'pill'; b.type = 'button';
-    const xr = cross(parse(ls), P, null), fit = P.mode !== 'fuse' || xr.DoReq <= P.fuseD + 1e-9;
-    b.innerHTML = `${ls}<small>${f2(xr.DoReq)} m${P.mode === 'fuse' ? (fit ? ' ✓' : ' ✗') : ''}</small>`;
-    if (ls === R.layoutStr) b.classList.add('on'); if (!fit) b.classList.add('nofit');
-    b.title = `${ls} (${sum(parse(ls))}열) — 필요 외경 ${f2(xr.DoReq)} m`;
-    b.onclick = () => {                                       // 배열을 직접 고르면 현재 기준 유지: 좌석 주도면 승객 수를 이 배열의 한계로 제한, 동체 주도면 배열 고정
-      P.base = null; P.layout = ls; activePreset = null; view.auto = true;
-      if (P.mode === 'fuse') P.autoLayout = false; else P.pax = Math.min(P.pax, layoutCap(P, ls).paxMax);
-      update();
-    };
-    pills.appendChild(b);
-  });
+  fillLayoutSel();
   updateCompare();
 }
 function errCls(e) { const a = Math.abs(e); return a <= 3 ? 'ok' : a <= 8 ? 'warn' : 'bad'; }
 function updateCompare() {
   const host = $('#cmp'), ps = PRESETS.find(p => p.id === activePreset);
-  if (!ps) { host.innerHTML = '<p class="small">좌측 “기준 기종 불러오기”에서 기종을 선택하세요. 현재 설정으로 계산한 값과 Airbus 공식 제원의 오차를 보여줍니다.</p>'; return; }
+  if (!ps) { host.innerHTML = '<p class="small">좌측 “기종 프리셋”에서 제작사와 기종을 선택하세요. 현재 설정으로 계산한 값과 Airbus 공식 제원의 오차를 보여줍니다.</p>'; return; }
   const X = cross(parse(ps.layout), P, null);
   const Ln = noseLen(P, X.DoReq), Lt = P.tailK * X.DoReq, ov = Math.min(P.overlapK * X.DoReq, Lt);
   const row = (nm, sim, ref, unit = 'm') => {
@@ -1261,13 +1346,17 @@ new ResizeObserver(() => { dirty = true; }).observe(xv);
 function init() {
   mkSliders($('#slDrive'), SLIDERS.drive);
   mkSliders($('#slCommon'), SLIDERS.common); mkSliders($('#slAdv'), SLIDERS.adv); mkSliders($('#slAdv2'), SLIDERS.adv2);
-  bindSeg('#bodySeg', v => { setBody(v); update(); });
+  applyTheme(((() => { try { return localStorage.getItem('cabinSimTheme'); } catch (e) { return null; } })()) || 'auto', false);
+  document.querySelectorAll('#themeSeg button').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.v, true)));
+  if (lightMQ && lightMQ.addEventListener) lightMQ.addEventListener('change', () => { if (themePref === 'auto') applyTheme('auto', false); });
+  $('#makerSel').innerHTML = MAKERS.map(m => `<option value="${m}">${m}</option>`).join(''); fillModels(uiMaker);
+  $('#makerSel').onchange = e => { uiMaker = e.target.value; fillModels(uiMaker); syncPresetUI(); };
+  $('#modelSel').onchange = e => { if (e.target.value) applyPreset(e.target.value); else activePreset = null; update(); };
+  $('#layoutSel').onchange = e => { const [body, ls] = e.target.value.split('|'); pickLayout(body, ls); update(); };
   $('#autoLayout').onchange = e => { P.autoLayout = e.target.checked; view.auto = true; update(); };
   $('#exitAuto').onchange = e => { P.exitAuto = e.target.checked; update(); };
   $('#aftFront').onchange = e => { P.aftFront = e.target.checked; update(); };
   $('#planClear').onclick = e => { e.preventDefault(); P.doorPlan = null; update(); };
-  $('#presets').innerHTML = PRESETS.map(p => `<button class="btn" data-id="${p.id}" title="${p.name}: 전장 ${p.L} m · 동체 폭 ${p.Do} m · 최대 객실 폭 ${p.Wcab} m${p.cal ? ' · 공식 외경·내경에 맞춘 보정값 함께 적용' : ''}">${p.name}${p.cal ? ' <small style="color:var(--acc)">보정</small>' : ''}</button>`).join('');
-  document.querySelectorAll('#presets button').forEach(b => b.onclick = () => { applyPreset(b.dataset.id); update(); });
   $('#resetAll').onclick = () => { P = Object.assign({}, DEF); activePreset = null; view.auto = true; update(); };
   $('#ruleDef').onclick = () => { Object.assign(P, RULE_DEF, { aisleIn: BODY_DEF[P.body].aisle, base: null }); activePreset = null; update(); };
   update(); requestAnimationFrame(frame);
