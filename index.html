@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>민항기 객실·동체 사이징 시뮬레이터</title>
+<style>
+:root{
+  --bg:#0a0e14; --p1:#10161f; --p2:#151d29; --p3:#1b2533; --line:#263246;
+  --txt:#e6ecf5; --mut:#8b9ab0; --acc:#38bdf8;
+  --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+  --seat:#2f6df0; --lav:#22d3ee; --galley:#f59e0b; --path:#fde68a; --exit:#22c55e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt)}
+body{font:14px/1.45 "Pretendard","Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR","Segoe UI",system-ui,sans-serif}
+button,input,select{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:344px minmax(0,1fr);min-height:100vh}
+aside{background:var(--p1);border-right:1px solid var(--line);padding:16px 16px 28px;overflow-y:auto;max-height:100vh;position:sticky;top:0}
+main{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+h1{font-size:17px;margin:0 0 2px;letter-spacing:-.2px}
+.sub{margin:0 0 14px;color:var(--mut);font-size:12px}
+.sec{border-top:1px solid var(--line);padding:12px 0 4px}
+.sec>h2{font-size:11px;font-weight:600;letter-spacing:.8px;color:var(--mut);margin:0 0 8px;text-transform:uppercase}
+.seg{display:flex;background:var(--p3);border:1px solid var(--line);border-radius:8px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;padding:7px 6px;border-radius:6px;cursor:pointer;color:var(--mut);font-weight:600}
+.seg button.on{background:var(--acc);color:#04202e}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pill{border:1px solid var(--line);background:var(--p3);border-radius:999px;padding:5px 11px;cursor:pointer;font-weight:600;font-variant-numeric:tabular-nums}
+.pill small{display:block;font-weight:400;font-size:10px;color:var(--mut);line-height:1.1}
+.pill.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset;color:var(--acc)}
+.pill.nofit{opacity:.45;border-style:dashed}
+.ctl{margin:0 0 11px}
+.ctl .top{display:flex;justify-content:space-between;gap:8px;font-size:12.5px}
+.ctl .lb{color:var(--txt)} .ctl output{color:var(--acc);font-variant-numeric:tabular-nums;text-align:right}
+input[type=range]{width:100%;margin:5px 0 0;accent-color:var(--acc);height:18px}
+input[type=range]:disabled{opacity:.35}
+.chk{display:flex;gap:8px;align-items:center;font-size:12.5px;margin:2px 0 10px;cursor:pointer}
+details{border-top:1px solid var(--line);padding:10px 0 2px}
+summary{cursor:pointer;font-weight:600;font-size:13px;list-style:none;color:var(--txt)}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";color:var(--acc)} details[open]>summary::before{content:"▾ "}
+details .hint{font-size:11.5px;color:var(--mut);margin:6px 0 10px}
+.btn{border:1px solid var(--line);background:var(--p3);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--acc)}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.card{background:var(--p1);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.kpi .k{font-size:11.5px;color:var(--mut);letter-spacing:.2px}
+.kpi .v{font-size:27px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.kpi .v small{font-size:13px;color:var(--mut);font-weight:500;margin-left:3px}
+.kpi .d{font-size:11.5px;color:var(--mut);margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--p2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--mut)}
+.chip b{color:var(--txt);font-weight:600;font-variant-numeric:tabular-nums}
+.banner{display:none;background:#3b1d1d;border:1px solid #7f2d2d;color:#fecaca;border-radius:10px;padding:8px 12px;font-size:13px}
+.banner.on{display:block}
+.banner.info{background:#13283a;border-color:#1f4a6b;color:#bae6fd}
+.viewport{position:relative;background:var(--p1);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+#lopa{display:block;width:100%;height:clamp(300px,46vh,520px);cursor:grab;touch-action:none}
+#lopa.drag{cursor:grabbing}
+.tools{position:absolute;top:10px;right:10px;display:flex;gap:6px}
+.tools .btn{padding:5px 10px;font-size:12.5px;background:#0f1722cc;backdrop-filter:blur(4px)}
+.legend{position:absolute;left:12px;bottom:10px;display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--mut);background:#0a0e14c0;padding:5px 9px;border-radius:8px;max-width:calc(100% - 24px)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.hint2{position:absolute;right:12px;bottom:10px;font-size:11px;color:#5d7391;background:#0a0e14c0;padding:3px 8px;border-radius:8px}
+.vtitle{position:absolute;left:12px;top:10px;font-size:12px;color:var(--mut)}
+#tip{position:fixed;pointer-events:none;z-index:9;background:#0b121c;border:1px solid #33465f;color:var(--txt);padding:6px 9px;border-radius:8px;font-size:12px;max-width:290px;display:none;box-shadow:0 6px 20px #0008;white-space:pre-line}
+.bottom{display:grid;grid-template-columns:minmax(340px,1.15fr) minmax(280px,1fr) minmax(280px,1fr);gap:12px}
+.card h3{margin:0 0 8px;font-size:13px;font-weight:600}
+#xsec{display:block;width:100%;height:420px}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;max-height:370px;overflow:auto}
+.rules li{display:grid;grid-template-columns:18px 1fr;gap:7px;font-size:12.5px;cursor:help}
+.rules .dot{width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--mut)}
+.rules .ok .dot{background:var(--ok)} .rules .warn .dot{background:var(--warn)} .rules .bad .dot{background:var(--bad)} .rules .info .dot{background:var(--acc)}
+.rules .t{font-weight:600} .rules .dtl{color:var(--mut);font-size:11.5px}
+.rules .ref{color:#5d7391;font-size:10.5px}
+table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+th,td{padding:5px 6px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mut);font-weight:500;font-size:11.5px}
+.err.ok{color:var(--ok)} .err.warn{color:var(--warn)} .err.bad{color:var(--bad)}
+.notes{font-size:12px;color:var(--mut)}
+.notes ul{margin:6px 0 0;padding-left:18px} .notes a{color:var(--acc)}
+.small{font-size:11.5px;color:var(--mut)}
+@media (max-width:1280px){.bottom{grid-template-columns:1fr 1fr}.bottom .card:first-child{grid-column:1/-1}}
+@media (max-width:900px){.legend,.hint2{position:static;display:flex;margin:6px 12px 8px;max-width:none}.hint2{display:block}.app{grid-template-columns:1fr}aside{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line)}.kpis{grid-template-columns:1fr 1fr}.bottom{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <h1>객실·동체 사이징 시뮬레이터</h1>
+  <p class="sub">완전 오프라인 · 단일 파일 · 개념설계용 (규정 검사는 근사 지표)</p>
+
+  <div class="sec"><h2>해석 모드</h2>
+    <div class="seg" id="modeSeg">
+      <button data-v="seat" title="목표 승객 수 또는 행 수를 입력하면 객실 길이·동체 직경·전장을 계산합니다">좌석 주도</button>
+      <button data-v="fuse" title="동체 전장과 직경을 입력하면 최대 승객 수·행 수·배열 적합 여부를 계산합니다">동체 주도</button>
+    </div>
+  </div>
+
+  <div class="sec"><h2>동체 형식 · 좌석 배열</h2>
+    <div class="seg" id="bodySeg">
+      <button data-v="narrow" title="단일 통로 (통로 1개)">협동체</button>
+      <button data-v="wide" title="이중 통로 (통로 2개)">광동체</button>
+    </div>
+    <div class="pills" id="layoutPills"></div>
+    <label class="chk" id="autoRow" style="margin-top:10px"><input type="checkbox" id="autoLayout"> 직경에 맞는 최대 배열 자동 선택</label>
+  </div>
+
+  <div class="sec" id="secSeat"><h2>좌석 주도 입력</h2>
+    <div class="seg" id="basisSeg" style="margin-bottom:10px">
+      <button data-v="pax">목표 승객 수</button><button data-v="rows">행 수</button>
+    </div>
+    <div id="slSeat"></div>
+  </div>
+  <div class="sec" id="secFuse"><h2>동체 주도 입력</h2><div id="slFuse"></div></div>
+
+  <div class="sec"><h2>좌석 치수</h2><div id="slCommon"></div></div>
+
+  <details id="adv"><summary>고급 설정 (통로·쉘·여유·단면·길이 계수)</summary>
+    <p class="hint">기본값은 요구 규칙 그대로입니다. 단, 단일통로 폭은 FAR 25.815 최소값(20 in)에 맞췄고 기수·꼬리는 실제 기종에 맞춰 보정했습니다.</p>
+    <div id="slAdv"></div>
+    <label class="chk"><input type="checkbox" id="exitAuto"> 출구열 추가 피치 자동 (25.813(c) 근사)</label>
+    <div id="slAdv2"></div>
+  </details>
+
+  <div class="sec"><h2>기준 기종 불러오기 (Airbus 공식 제원)</h2>
+    <div class="presets" id="presets"></div>
+    <p class="small" style="margin:8px 0 0">배열·전장·직경을 불러옵니다. 우측 하단 표에서 오차를 확인하세요.</p>
+  </div>
+  <div class="sec"><button class="btn" id="resetAll" style="width:100%">모든 설정 초기화</button></div>
+</aside>
+
+<main>
+  <div class="banner" id="banner"></div>
+  <section class="kpis">
+    <div class="card kpi" title="좌석 수 = 행 수 × 가로 좌석 수. 목표 승객 수보다 작을 수 없도록 행 단위로 올림합니다."><div class="k">총 승객 수 (Total Pax)</div><div class="v"><span id="kPax">-</span><small>석</small></div><div class="d" id="kPaxD"></div></div>
+    <div class="card kpi" title="전장 = 기수 + 객실 + 꼬리 원추 − 꼬리 원추 내 객실 중첩"><div class="k">동체 전장 (L)</div><div class="v"><span id="kLen">-</span><small>m</small></div><div class="d" id="kLenD"></div></div>
+    <div class="card kpi" title="외경 = 객실 폭 + 곡률 보정 + 2×쉘 두께 (원형 단면 기하로 곡률 보정을 계산)"><div class="k">동체 외경 (D)</div><div class="v"><span id="kDia">-</span><small>m</small></div><div class="d" id="kDiaD"></div></div>
+    <div class="card kpi" title="세장비 L/D = 동체 전장 ÷ 동체 외경"><div class="k">세장비 L/D</div><div class="v"><span id="kLD">-</span></div><div class="d" id="kLDD"></div></div>
+  </section>
+  <div class="chips" id="chips"></div>
+
+  <section class="viewport">
+    <div class="vtitle">객실 배치도 (LOPA) · 평면도</div>
+    <div class="tools">
+      <button class="btn" id="zin" title="확대">＋</button><button class="btn" id="zout" title="축소">－</button>
+      <button class="btn" id="vreset" title="뷰를 동체 전체에 맞춥니다 (더블클릭도 가능)">뷰 초기화</button>
+    </div>
+    <canvas id="lopa" title="휠: 확대/축소 · 드래그: 이동 · 더블클릭: 뷰 초기화"></canvas>
+    <div class="hint2">휠: 확대/축소 · 드래그: 이동 · 더블클릭: 초기화</div>
+    <div class="legend">
+      <span><i style="background:#2f6df0"></i>이코노미 좌석</span><span><i style="background:#22d3ee"></i>화장실</span>
+      <span><i style="background:#f59e0b"></i>갤리</span><span><i style="background:#fde68a"></i>탈출 경로</span>
+      <span><i style="background:#22c55e"></i>비상탈출구</span><span><i style="background:#64748b"></i>윙박스(참고)</span>
+    </div>
+  </section>
+
+  <section class="bottom">
+    <div class="card"><h3>동체 단면 (Cross-section)</h3><canvas id="xsec"></canvas></div>
+    <div class="card"><h3>규정·설계 검사 <span class="small">(마우스를 올리면 근거 조항)</span></h3><ul class="rules" id="rules"></ul></div>
+    <div class="card"><h3>기준 기종 대비 오차</h3><div id="cmp"><p class="small">좌측 “기준 기종 불러오기”에서 기종을 선택하세요.</p></div></div>
+  </section>
+
+  <section class="card notes">
+    <details><summary>가정·한계·출처 (반드시 확인)</summary>
+      <ul>
+        <li><b>좌석 폭</b> = 팔걸이 사이 쿠션 폭, 팔걸이는 인접 좌석이 공유합니다 (팔걸이 수 = 좌석 수 + 좌석 군 수).</li>
+        <li><b>곡률 보정</b>: 바닥이 단면 중심 아래(내경의 10%, 가정)에 있다고 보고, 팔걸이 높이(25 in = 0.635 m)에서의 객실 폭과 바닥 가장자리가 단면 안에 들어가는 최소 반경을 닫힌 형태로 계산합니다.</li>
+        <li><b>기수·꼬리</b>: 기수 1.4D, 꼬리 원추 2.5D는 규칙 그대로이나, 실제 기종은 후방 객실이 꼬리 원추 안으로 들어가므로 “꼬리 내 객실 중첩 1.4D”를 보정 계수로 둡니다 (비객실 길이 ≈ 2.5D, A320 2.55D · A330-300 2.36D · A350-900 2.65D 로 역산).</li>
+        <li><b>출구 체계</b>: ≤100석 Type I 2쌍 · 101~180석 Type I 2쌍 + 오버윙 Type III 2쌍 · 181~360석 Type I 4쌍 · 361석 이상 Type A 4쌍(확장). 60 ft 간격 위반 시 자동 보강합니다. 각 출구 상한의 합산 방식은 해석이므로 원문을 확인하세요.</li>
+        <li><b>Type III 접근 통로</b>는 “출구열 추가 피치”를 통로 폭의 대리 지표로 쓰는 근사입니다 (3석 측 6 in×2 대안 = 12 in).</li>
+        <li>화장실 1개/50명, 150명 초과 중앙 모듈, 윙박스 위치(객실 길이 비율 42%), 바닥 위치, 서비스 모듈 길이는 <b>규정이 아닌 설계 가정</b>입니다. 25.803의 90초 탈출 입증은 계산하지 않습니다.</li>
+        <li>좌석 폭·피치의 법정 최소값은 공식 문서로 확인하지 못했습니다 (슬라이더 범위는 설계 관행).</li>
+        <li>출처: <a href="https://www.ecfr.gov/current/title-14/chapter-I/subchapter-C/part-25/subpart-D/subject-group-ECFR88992669bab3b52/section-25.807">14 CFR 25.807</a> ·
+          <a href="https://www.ecfr.gov/current/title-14/chapter-I/subchapter-C/part-25/subpart-D/subject-group-ECFR88992669bab3b52/section-25.813">25.813</a> ·
+          <a href="https://www.ecfr.gov/current/title-14/chapter-I/subchapter-C/part-25/subpart-D/subject-group-ECFR88992669bab3b52/section-25.815">25.815</a> ·
+          <a href="https://www.ecfr.gov/current/title-14/chapter-I/subchapter-C/part-25/subpart-D/subject-group-ECFR88992669bab3b52/section-25.803">25.803</a> ·
+          <a href="https://aircraft.airbus.com/en/aircraft/a320/a320ceo">A320ceo</a> ·
+          <a href="https://aircraft.airbus.com/en/aircraft/a320-family/a321ceo">A321ceo</a> ·
+          <a href="https://www.aircraft.airbus.com/en/aircraft/a330/a330-300">A330-300</a> ·
+          <a href="https://www.aircraft.airbus.com/en/aircraft/a350/a350-900">A350-900</a>
+          (링크는 참고용이며 시뮬레이터는 네트워크를 사용하지 않습니다)</li>
+      </ul>
+    </details>
+  </section>
+</main>
+</div>
+<div id="tip"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   민항기 객실·동체 사이징 시뮬레이터 — 순수 JS / Canvas, 외부 의존성 없음
+   구조: 상태(P) → solve(P) → 결과(R) → draw(R)  (계산과 그리기를 분리)
+   내부 단위는 SI(m). 입력 표시는 in(m) 병기.
+   ===================================================================== */
+const IN = 0.0254, FT = 0.3048, GAP60 = 60 * FT;       // 60 ft = 18.288 m (25.807 출구 간격)
+const ARM_H = 25 * IN;                                  // 25.815 통로 폭 측정 높이 (≈ 팔걸이 높이)
+const LETTERS = 'ABCDEFGHJK';
+const $ = (s, r = document) => r.querySelector(s);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const sum = a => a.reduce((x, y) => x + y, 0);
+const parse = s => s.split('-').map(Number);
+const FONT = '"Pretendard","Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif';
+
+/* 출구 종류: 개구부 w×h (in), 개소당 좌석 상한 — 14 CFR 25.807(a),(g) */
+const TYPE = { A: { w: 42, h: 72, cap: 110, nm: 'Type A' }, I: { w: 24, h: 48, cap: 45, nm: 'Type I' }, III: { w: 20, h: 36, cap: 35, nm: 'Type III' } };
+const doorW = t => TYPE[t].w * IN;
+const vestLen = t => doorW(t) + 0.3;                   // 도어 앞 베스티뷸 길이
+const LAYOUTS = { narrow: ['2-2', '3-2', '3-3'], wide: ['2-3-2', '2-4-2', '3-3-3', '3-4-3'] };
+const DEF_LAYOUT = { narrow: '3-3', wide: '2-4-2' };
+const RANGE = {
+  narrow: { pax: [50, 240], rows: [8, 60], L: [20, 60], D: [2.9, 4.8] },
+  wide:   { pax: [150, 550], rows: [16, 80], L: [40, 90], D: [5.0, 7.2] }
+};
+const BODY_DEF = { narrow: { pax: 180, rows: 30, L: 37.6, D: 4.0 }, wide: { pax: 300, rows: 38, L: 63.7, D: 5.7 } };
+
+/* 기준 기종 — Airbus 공식 제품 페이지 값 (A350 외경은 페이지 5.94 m, 팩트시트 5.96 m) */
+const PRESETS = [
+  { id: 'A320', name: 'A320ceo', body: 'narrow', layout: '3-3', L: 37.57, Lcab: 27.51, Do: 3.95, Wcab: 3.70 },
+  { id: 'A321', name: 'A321ceo', body: 'narrow', layout: '3-3', L: 44.51, Lcab: null, Do: 3.95, Wcab: 3.70 },
+  { id: 'A330', name: 'A330-300', body: 'wide', layout: '2-4-2', L: 63.66, Lcab: 50.36, Do: 5.64, Wcab: 5.26 },
+  { id: 'A350', name: 'A350-900', body: 'wide', layout: '3-3-3', L: 66.80, Lcab: 51.04, Do: 5.94, Wcab: 5.71 }
+];
+
+const DEF = {
+  mode: 'seat', body: 'narrow', layout: '3-3', basis: 'pax',
+  pax: 180, rows: 30, fuseL: 37.6, fuseD: 4.0, autoLayout: true,
+  pitchIn: 31, seatIn: 18, armIn: 2, aisleIn: 20, clrIn: 3.5, shellIn: 6,
+  floorK: 0.10, aspect: 1.0,
+  noseK: 1.4, tailK: 2.5, overlapK: 1.4,
+  fwdLen: 2.0, aftLen: 2.5, midLen: 2.0, bayLen: 1.2,
+  lavPer: 50, exitAuto: true, exitIn: 10, wingPos: 0.42
+};
+let P = Object.assign({}, DEF), activePreset = null, RES = null;
+
+/* ---------------------------------------------------------------------
+   1. 단면 사이징
+   W = Σ좌석 + Σ팔걸이 + Σ통로 + 2×측벽 여유,  D_out = D_in + 2×쉘
+   D_in 은 곡률 보정을 포함: 바닥이 중심 아래 f=floorK·a 에 있는 타원(원형이면 aspect=1)에서
+   (좌석 외곽 바닥점, 팔걸이 높이 25 in 의 객실 폭) 두 점이 들어가는 최소 반경을 닫힌 형태로 구함.
+   --------------------------------------------------------------------- */
+function lateral(layout, seat, arm, aisle, clr, W) {
+  const els = [], seats = [], regions = [], aisles = [];
+  let v = -W / 2 + clr, order = 0;
+  layout.forEach((n, gi) => {
+    if (gi > 0) { aisles.push({ v0: v, v1: v + aisle }); v += aisle; }
+    const gv0 = v;
+    for (let i = 0; i <= n; i++) {
+      els.push({ t: 'arm', v0: v, v1: v + arm }); v += arm;
+      if (i < n) { const e = { t: 'seat', v0: v, v1: v + seat, g: gi, i, order: order++ }; els.push(e); seats.push(e); v += seat; }
+    }
+    regions.push({ v0: gi === 0 ? -W / 2 : gv0, v1: gi === layout.length - 1 ? W / 2 : v });
+  });
+  return { els, seats, regions, aisles };
+}
+function cross(layout, P, Dtarget) {
+  const ab = sum(layout), g = layout.length;
+  const seat = P.seatIn * IN, arm = P.armIn * IN, aisle = P.aisleIn * IN, clr = P.clrIn * IN, shell = P.shellIn * IN;
+  const nArm = ab + g, nAisle = g - 1;                                  // 공유 팔걸이: 좌석 수 + 좌석 군 수
+  const W = ab * seat + nArm * arm + nAisle * aisle + 2 * clr;
+  const k = P.aspect, fr = P.floorK, A = 1 - fr * fr / (k * k);
+  let aReq = 0;
+  for (const p of [{ x: W / 2 - clr, z: 0 }, { x: W / 2, z: ARM_H }]) {
+    const B = 2 * p.z * fr / (k * k), C = p.x * p.x + p.z * p.z / (k * k);
+    aReq = Math.max(aReq, (-B + Math.sqrt(B * B + 4 * A * C)) / (2 * A));
+  }
+  const DoReq = 2 * (aReq + shell);
+  const a = Dtarget == null ? aReq : Math.max(Dtarget / 2 - shell, 0.1);
+  const lat = lateral(layout, seat, arm, aisle, clr, W);
+  return Object.assign({
+    layout, ab, g, nArm, nAisle, W, aReq, DoReq, DiReq: 2 * aReq, a, b: k * a, f: fr * a, Di: 2 * a, Do: 2 * (a + shell),
+    shell, margin: 2 * a - W, fits: Dtarget == null || Dtarget >= DoReq - 1e-9, seat, arm, aisle, clr, k
+  }, lat);
+}
+
+/* ---------------------------------------------------------------------
+   2. 객실 종방향 구성 (서비스 모듈 · 출구 · 좌석열)
+   --------------------------------------------------------------------- */
+const tierFor = pax => pax <= 100 ? 1 : pax <= 180 ? 2 : pax <= 360 ? 3 : 4;
+function exitExtraM(P, layout) {
+  if (!P.exitAuto) return P.exitIn * IN;
+  return (Math.max(layout[0], layout[layout.length - 1]) >= 3 ? 12 : 10) * IN;
+}
+function cellsFor(x0, x1, nLav, nGal, X) {
+  const cells = [];
+  if (x1 - x0 < 0.2) return cells;
+  const regs = X.regions.map((r, i) => ({ i, v0: r.v0, v1: r.v1, w: r.v1 - r.v0 }));
+  const big = regs.reduce((m, r) => r.w > m.w + 1e-9 ? r : m, regs[0]);
+  const others = regs.filter(r => r !== big);
+  const asg = regs.map(() => ({ lav: 0, gal: 0 }));
+  asg[big.i].gal = nGal;
+  if (nLav > 0) {
+    const tw = sum(others.map(r => r.w));
+    const q = others.map(r => { const x = nLav * r.w / tw; return { r, n: Math.floor(x), f: x - Math.floor(x) }; });
+    const left = nLav - sum(q.map(o => o.n));
+    q.slice().sort((a, b) => b.f - a.f).slice(0, left).forEach(o => o.n++);
+    q.forEach(o => asg[o.r.i].lav = o.n);
+  }
+  regs.forEach(r => {
+    const items = [...Array(asg[r.i].gal).fill('gal'), ...Array(asg[r.i].lav).fill('lav')], k = items.length;
+    if (!k) return;
+    const w = r.w, h = x1 - x0, cols = clamp(Math.round(Math.sqrt(k * w / h)), 1, k), rw = Math.ceil(k / cols);
+    const cw = w / cols, ch = h / rw;
+    items.forEach((t, idx) => {
+      const cc = idx % cols, rr = Math.floor(idx / cols);
+      cells.push({ t, x0: x0 + rr * ch, x1: x0 + (rr + 1) * ch, v0: r.v0 + cc * cw, v1: r.v0 + (cc + 1) * cw });
+    });
+  });
+  return cells;
+}
+
+function build(rows, X, P, tier, slack, extraMid, slackAt) {
+  extraMid = extraMid || 0;
+  const ab = X.ab, pax = rows * ab, pitch = P.pitchIn * IN, depth = Math.min(0.5, 0.62 * pitch);
+  const extra = exitExtraM(P, X.layout);
+  const dt = tier === 4 ? 'A' : 'I', vest = vestLen(dt);
+  const rW = clamp(Math.round(P.wingPos * rows), 1, Math.max(1, rows));
+  const exitRows = new Set();
+  if (tier === 2 && rows >= 3) { exitRows.add(clamp(rW - 1, 1, rows)); exitRows.add(clamp(rW + 1, 1, rows)); }
+  /* 중앙 서비스 모듈: 150명 초과 시 ceil(pax/150)-1 개 (최대 3). 3·4단계는 중앙 도어 2쌍 이상 */
+  const nSvc = Math.min(3, Math.max(0, Math.ceil(pax / 150) - 1));
+  const m = rows < 4 ? 0 : (tier >= 3 ? Math.max(2 + extraMid, nSvc) : nSvc);
+  const bays = [], used = new Set();
+  for (let j = 1; j <= m; j++) {
+    let after = Math.round(rows * j / (m + 1));
+    if (tier === 2 && Math.abs(after - rW) <= 2) after = rW + 3;
+    after = clamp(after, 1, rows - 1);
+    while (used.has(after) && after < rows - 1) after++;
+    if (used.has(after)) continue;
+    used.add(after); bays.push({ after, svc: j <= nSvc, door: tier >= 3 });
+  }
+  bays.sort((a, b) => a.after - b.after);
+
+  const mods = [], rowsArr = [];
+  let s = P.fwdLen, slackIv = null;
+  const spread = slackAt && slackAt.spread && rows > 0 ? slack / rows : 0;
+  const useSlack = slack > 0.01 && !spread, at = slackAt || { after: rows, beforeBay: false };
+  const putSlack = () => { slackIv = [s, s + slack]; s += slack; };
+  const fwd = { kind: 'fwd', s0: 0, s1: P.fwdLen }; mods.push(fwd);
+  if (useSlack && at.after === 0) putSlack();
+  for (let r = 1; r <= rows; r++) {
+    const ex = exitRows.has(r), alloc = pitch + spread + (ex ? extra : 0);
+    rowsArr.push({ n: r, s0: s, s1: s + alloc, depth, exit: ex, alloc }); s += alloc;
+    if (useSlack && at.after === r && at.beforeBay) putSlack();
+    const b = bays.find(b => b.after === r);
+    if (b) { const len = b.svc ? P.midLen : Math.max(P.bayLen, vest); b.s0 = s; b.s1 = s + len; b.kind = b.svc ? 'mid' : 'bay'; s += len; mods.push(b); }
+    if (useSlack && at.after === r && !at.beforeBay) putSlack();
+  }
+  const seatEnd = s;
+  const aft = { kind: 'aft', s0: s, s1: s + P.aftLen }; s += P.aftLen; mods.push(aft);
+  const L = s;
+
+  /* 화장실·갤리 배분 */
+  const nLav = Math.max(2, Math.ceil(pax / P.lavPer));
+  const mid = mods.filter(x => x.kind === 'mid');
+  fwd.lav = 1; let rest = nLav - 1;
+  aft.lav = Math.ceil(rest / (mid.length + 1)); rest -= aft.lav;
+  mid.forEach((x, i) => { x.lav = Math.floor(rest / mid.length) + (i < rest % mid.length ? 1 : 0); });
+  mods.forEach(x => { x.gal = (x.kind === 'bay') ? 0 : 1; if (x.kind === 'bay') x.lav = 0; });
+  /* 도어 베스티뷸과 셀 영역 */
+  fwd.vest = [0, vest]; fwd.cx = [vest, fwd.s1];
+  aft.vest = [aft.s1 - vest, aft.s1]; aft.cx = [aft.s0, aft.s1 - vest];
+  mods.forEach(x => {
+    if (x.kind === 'mid') { if (x.door) { x.vest = [x.s0, x.s0 + vest]; x.cx = [x.s0 + vest, x.s1]; } else x.cx = [x.s0, x.s1]; }
+    if (x.kind === 'bay') { x.vest = [x.s0, x.s1]; }
+    x.cells = x.cx ? cellsFor(x.cx[0], x.cx[1], x.lav, x.gal, X) : [];
+  });
+
+  /* 출구 목록 (좌우 1쌍씩) */
+  const exits = [];
+  mods.forEach(x => { if (x.vest) exits.push({ kind: 'door', type: dt, s: (x.vest[0] + x.vest[1]) / 2, mod: x.kind }); });
+  exitRows.forEach(r => { const rw = rowsArr[r - 1]; exits.push({ kind: 'ow', type: 'III', s: rw.s0 + rw.depth + (rw.alloc - rw.depth) / 2, row: r }); });
+  exits.sort((a, b) => a.s - b.s);
+  let gapMax = 0;
+  for (let i = 1; i < exits.length; i++) gapMax = Math.max(gapMax, (exits[i].s - doorW(exits[i].type) / 2) - (exits[i - 1].s + doorW(exits[i - 1].type) / 2));
+  const cnt = t => exits.filter(e => e.type === t).length * 2;                       // 양측 합
+  const n3 = cnt('III'), close3 = exitRows.size === 2;                               // 2열 간격 → 3열 미만
+  const cap3 = n3 ? Math.min(n3 * TYPE.III.cap, close3 ? 65 : 70) : 0;
+  const capacity = cnt('I') * TYPE.I.cap + cnt('A') * TYPE.A.cap + cap3;
+  const wRow = rowsArr[rW - 1];
+  return {
+    rows, pax, tier, extraMid, spread: spread > 0, rowsArr, mods, exits, L, seatEnd, slackIv, extra, exitRows, depth, doorType: dt, vest,
+    gapMax, gapOK: gapMax <= GAP60 + 1e-9, capacity, cap3, nLav, nGal: mods.filter(x => x.gal).length,
+    wingS: wRow ? (wRow.s0 + wRow.s1) / 2 : P.fwdLen
+  };
+}
+function placeSlack(base, rows, X, P, tier, extra, slack) {
+  /* 남는 길이: 출구 간격 규정을 지키는 구간(간격이 짧은 순)에 배치, 모두 불가하면 행 간격에 분산 */
+  const segs = [];
+  for (let i = 1; i < base.exits.length; i++) {
+    const a = base.exits[i - 1], e = base.exits[i], gap = (e.s - doorW(e.type) / 2) - (a.s + doorW(a.type) / 2);
+    let at = { after: rows, beforeBay: false };
+    if (e.kind === 'ow') at = { after: e.row - 1, beforeBay: false };
+    else if (e.mod !== 'aft') {
+      const bay = base.mods.find(m => m.vest && m.kind !== 'fwd' && m.kind !== 'aft' && Math.abs((m.vest[0] + m.vest[1]) / 2 - e.s) < 1e-6);
+      at = { after: bay ? base.rowsArr.filter(r => r.s1 <= bay.s0 + 1e-9).length : rows, beforeBay: true };
+    }
+    segs.push({ gap, at });
+  }
+  if (!segs.length) segs.push({ gap: 0, at: { after: rows, beforeBay: false } });
+  segs.sort((x, y) => x.gap - y.gap);
+  for (const sg of segs) { const t = build(rows, X, P, tier, slack, extra, sg.at); if (t.gapOK) return t; }
+  return build(rows, X, P, tier, slack, extra, { spread: true });
+}
+function cabin(rows, X, P, slack) {
+  /* 60 ft 간격을 만족할 때까지 출구를 자동 보강: 단계 상향(최대 3) → 중앙 도어 쌍 추가(최대 +3).
+     slack>0 이면 남는 길이를 넣은 상태에서도 규정을 만족해야 한다. */
+  let tier = tierFor(rows * X.ab), extra = 0, up = 0;
+  for (;;) {
+    const c0 = build(rows, X, P, tier, 0, extra);
+    const c = (slack > 0.01 && c0.gapOK) ? placeSlack(c0, rows, X, P, tier, extra, slack) : c0;
+    if (c.gapOK || (tier >= 3 && extra >= 3)) { c.upgraded = up > 0; return c; }
+    if (tier < 3) tier++; else extra++;
+    up++;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   3. 전체 해석 (좌석 주도 / 동체 주도)
+   --------------------------------------------------------------------- */
+function solve(P) {
+  let X, layoutStr, rows, c, Do, slack = 0, Lf, fitInfo = null, noLen = false, noFit = false, targetPax = null;
+  if (P.mode === 'seat') {
+    layoutStr = P.layout; X = cross(parse(layoutStr), P, null);
+    rows = P.basis === 'pax' ? Math.max(1, Math.ceil(P.pax / X.ab)) : P.rows;
+    targetPax = P.basis === 'pax' ? P.pax : null;
+    c = cabin(rows, X, P, 0); Do = X.Do;
+  } else {
+    const fits = LAYOUTS[P.body].map(ls => ({ ls, X: cross(parse(ls), P, P.fuseD) }));
+    fitInfo = fits.map(f => ({ ls: f.ls, req: f.X.DoReq, fit: f.X.fits, ab: f.X.ab }));
+    let pick;
+    if (P.autoLayout) { const ok = fits.filter(f => f.X.fits); pick = ok.length ? ok.reduce((m, f) => f.X.ab > m.X.ab ? f : m) : fits[0]; }
+    else pick = fits.find(f => f.ls === P.layout) || fits[0];
+    X = pick.X; layoutStr = pick.ls; Do = P.fuseD; noFit = !X.fits;
+    const Ln0 = P.noseK * Do, Lt0 = P.tailK * Do, ov0 = Math.min(P.overlapK * Do, Lt0);
+    const avail = P.fuseL - Ln0 - Lt0 + ov0;
+    let rMax = 0; const c00 = cabin(0, X, P, 0);
+    if (c00.L > avail) noLen = true;
+    else if (!noFit) { for (let r = 1; r <= 200; r++) { if (cabin(r, X, P, 0).L > avail) break; rMax = r; } }
+    rows = 0; slack = 0;
+    if (!noFit && !noLen) {                              // 남는 길이를 넣고도 출구 규정을 만족하는 최대 행 수
+      for (let r = rMax; r >= 0; r--) {
+        const sl = avail - cabin(r, X, P, 0).L, t = cabin(r, X, P, sl);
+        if (t.L <= avail + 1e-9 && t.gapOK) { rows = r; slack = sl; break; }
+      }
+    }
+    c = cabin(rows, X, P, slack); Lf = P.fuseL;
+  }
+  const Ln = P.noseK * Do, Lt = P.tailK * Do, ov = Math.min(P.overlapK * Do, Lt, c.L);
+  if (Lf == null) Lf = Ln + c.L + Lt - ov;
+  let hintSeat = null;
+  if (noFit) {                                          // 이 직경에 들어가는 최대 좌석 폭 (0.1 in 단위)
+    for (let w = P.seatIn; w >= 14; w = Math.round((w - 0.1) * 10) / 10) { if (cross(X.layout, Object.assign({}, P, { seatIn: w }), null).DoReq <= P.fuseD + 1e-9) { hintSeat = w; break; } }
+  }
+  const Ro = Do / 2;
+  const tO = clamp(ov / Lt, 0.02, 0.98), r = (X.W / 2 + X.shell + 0.02) / Ro;
+  const pTail = clamp(Math.log(Math.max(1 - r, 0.005) / 0.92) / Math.log(tO), 1.6, 12);
+  const R = { P: Object.assign({}, P), layoutStr, X, rows, pax: rows * X.ab, targetPax, c, Do, Ln, Lt, ov, Lf, Ro, slack, ratio: Lf / Do, fitInfo, noLen, noFit, pTail, hintSeat };
+  R.checks = evaluate(R);
+  return R;
+}
+
+/* ---------------------------------------------------------------------
+   4. 규정·설계 검사
+   --------------------------------------------------------------------- */
+function evaluate(R) {
+  const { P, c, X, pax } = R, out = [];
+  const add = (st, title, detail, ref) => out.push({ st, title, detail, ref });
+  const aisIn = P.aisleIn;
+  add(aisIn >= 20 - 1e-9 ? 'ok' : 'bad', '통로 폭', `${aisIn.toFixed(1)} in — 20석 이상: 바닥 25 in 이상 높이에서 ≥ 20 in (25 in 미만은 ≥ 15 in, 본 모델은 25 in 높이 기준)`, '14 CFR 25.815');
+  if (P.mode === 'fuse') {
+    add(R.noFit ? 'bad' : 'ok', '단면 적합', R.noFit ? `${R.layoutStr} 필요 외경 ${R.X.DoReq.toFixed(2)} m > 입력 ${P.fuseD.toFixed(2)} m` + (R.hintSeat != null ? ` (좌석 폭 ${R.hintSeat.toFixed(1)} in 이하면 적합)` : '') : `${R.layoutStr} 필요 외경 ${X.DoReq.toFixed(2)} m ≤ 입력 ${P.fuseD.toFixed(2)} m (여유 ${(P.fuseD - X.DoReq).toFixed(2)} m)`, '단면 기하');
+    add(R.noLen ? 'bad' : 'ok', '길이 적합', R.noLen ? '전장이 기수·꼬리·최소 서비스 모듈에도 부족합니다' : `${R.rows}행 배치, 미사용 길이 ${R.slack.toFixed(2)} m${R.c.spread ? ' (출구 간격 규정 때문에 행 간격에 분산)' : ''}`, '종방향 구성');
+  }
+  const side = t => c.exits.filter(e => e.type === t).length;
+  const nI = side('I') + side('A'), nAll = c.exits.length;
+  let need = '-', ok = true;
+  if (pax > 110) { need = '편측 Type I 이상 ≥ 2'; ok = nI >= 2; }
+  else if (pax >= 41) { need = '편측 ≥ 2개소, 그중 Type I 이상 ≥ 1'; ok = nAll >= 2 && nI >= 1; }
+  else if (pax >= 20) { need = '편측 ≥ 2개소, 그중 Type II 이상 ≥ 1'; ok = nAll >= 2; }
+  add(ok ? 'ok' : 'bad', '출구 최소 개소', `${pax}석 → ${need} / 현재 편측 ${nAll}개소 (Type I 이상 ${nI})`, '14 CFR 25.807(g)');
+  add(c.capacity >= pax ? 'ok' : 'bad', '출구 용량 합계', `상한 합 ${c.capacity}석 ≥ ${pax}석 (Type I 45 · A 110 · III 35, III 합계는 65/70석 제한). 양측 합산은 해석`, '14 CFR 25.807(g)');
+  add(c.gapOK ? 'ok' : 'bad', '출구 간격 ≤ 60 ft', `최대 간격 ${c.gapMax.toFixed(1)} m (한계 ${GAP60.toFixed(2)} m)${c.upgraded ? ' — 자동으로 출구 단계를 보강했습니다' : ''}`, '14 CFR 25.807(f)');
+  const sideGrp = Math.max(X.layout[0], X.layout[X.layout.length - 1]);
+  if (c.exitRows.size && pax >= 60) {
+    const req = sideGrp >= 3 ? 12 : 10, have = c.extra / IN;
+    add(have + 1e-9 >= req ? 'ok' : 'warn', 'Type III 접근 통로 (근사)', `출구 측 ${sideGrp}석 → 통로 ${sideGrp >= 3 ? '20 in 또는 6 in×2(=12 in)' : '10 in'} 필요 / 추가 피치 ${have.toFixed(1)} in 로 대용`, '14 CFR 25.813(c)');
+  } else add('info', 'Type III 접근 통로', c.exitRows.size ? '60석 미만: 10/20 in 규정 적용 대상 아님' : '오버윙 Type III 출구 없음', '14 CFR 25.813(c)');
+  add('info', '90초 탈출 (25.803)', `${pax > 44 ? '44석 초과: 만석·절반 출구 90초 입증 필요' : '44석 이하'} — 본 도구는 입증하지 않습니다`, '14 CFR 25.803');
+  add('info', '화장실 · 갤리', `화장실 ${c.nLav}개 (1/${P.lavPer}명 가정) · 갤리 ${c.nGal}개`, '설계 가정');
+  add('info', '단면 곡률 보정', `객실 폭 ${X.W.toFixed(2)} m → 내경 ${X.Di.toFixed(2)} m (보정 ${X.margin >= 0 ? '+' : '−'}${Math.abs(X.margin * 100).toFixed(0)} cm), 중심선 객실 높이 ${(X.f + X.b).toFixed(2)} m`, '단면 기하');
+  return out;
+}
+
+/* ---------------------------------------------------------------------
+   5. UI: 컨트롤 생성·동기화
+   --------------------------------------------------------------------- */
+const inFmt = v => `${v.toFixed(1)} in (${(v * IN).toFixed(3)} m)`;
+const SLIDERS = {
+  seat: [
+    { k: 'pax', label: '목표 승객 수', fmt: v => `${Math.round(v)} 명`, step: 1, show: () => P.basis === 'pax' },
+    { k: 'rows', label: '좌석 행 수', fmt: v => `${Math.round(v)} 행`, step: 1, show: () => P.basis === 'rows' }
+  ],
+  fuse: [
+    { k: 'fuseL', label: '동체 전장', fmt: v => `${v.toFixed(2)} m`, step: 0.05 },
+    { k: 'fuseD', label: '동체 외경', fmt: v => `${v.toFixed(2)} m`, step: 0.01 }
+  ],
+  common: [
+    { k: 'pitchIn', label: '좌석 피치', min: 28, max: 40, step: 0.5, fmt: inFmt },
+    { k: 'seatIn', label: '좌석 폭 (팔걸이 사이)', min: 16, max: 20, step: 0.1, fmt: inFmt }
+  ],
+  adv: [
+    { k: 'armIn', label: '팔걸이 폭', min: 1, max: 3, step: 0.1, fmt: inFmt },
+    { k: 'aisleIn', label: '통로 폭 (25 in 높이)', min: 15, max: 26, step: 0.5, fmt: inFmt },
+    { k: 'clrIn', label: '측벽 여유 (구조 클리어런스)', min: 1, max: 6, step: 0.1, fmt: inFmt },
+    { k: 'shellIn', label: '쉘 두께 (외피+프레임+단열)', min: 3, max: 10, step: 0.1, fmt: inFmt },
+    { k: 'floorK', label: '바닥 위치 (중심 아래, 반경 비)', min: 0, max: 0.3, step: 0.01, fmt: v => `${(v * 100).toFixed(0)} %` },
+    { k: 'aspect', label: '단면 종횡비 (높이/폭, 1=원형)', min: 0.9, max: 1.2, step: 0.01, fmt: v => v.toFixed(2) },
+    { k: 'noseK', label: '기수 길이 계수 (×D)', min: 0.8, max: 2.4, step: 0.05, fmt: v => v.toFixed(2) + ' D' },
+    { k: 'tailK', label: '꼬리 원추 길이 계수 (×D)', min: 1.5, max: 3.5, step: 0.05, fmt: v => v.toFixed(2) + ' D' },
+    { k: 'overlapK', label: '꼬리 내 객실 중첩 (×D, 보정)', min: 0, max: 2.4, step: 0.05, fmt: v => v.toFixed(2) + ' D' },
+    { k: 'fwdLen', label: '전방 서비스 모듈 길이', min: 1.2, max: 4, step: 0.1, fmt: v => v.toFixed(1) + ' m' },
+    { k: 'aftLen', label: '후방 서비스 모듈 길이', min: 1.5, max: 5, step: 0.1, fmt: v => v.toFixed(1) + ' m' },
+    { k: 'midLen', label: '중앙 서비스 모듈 길이', min: 1.6, max: 4, step: 0.1, fmt: v => v.toFixed(1) + ' m' },
+    { k: 'lavPer', label: '화장실 1개당 승객 수', min: 30, max: 80, step: 1, fmt: v => `${Math.round(v)} 명` },
+    { k: 'wingPos', label: '윙박스 위치 (객실 좌석 구간 비율)', min: 0.3, max: 0.6, step: 0.01, fmt: v => `${(v * 100).toFixed(0)} %` }
+  ],
+  adv2: [
+    { k: 'exitIn', label: '출구열 추가 피치 (수동)', min: 0, max: 24, step: 0.5, fmt: inFmt }
+  ]
+};
+const ctlMap = {};
+function mkSliders(host, list) {
+  list.forEach(sp => {
+    const d = document.createElement('div'); d.className = 'ctl';
+    d.innerHTML = `<div class="top"><span class="lb">${sp.label}</span><output></output></div><input type="range">`;
+    host.appendChild(d);
+    const inp = d.querySelector('input'), out = d.querySelector('output');
+    if (sp.min != null) { inp.min = sp.min; inp.max = sp.max; }
+    inp.step = sp.step;
+    inp.addEventListener('input', () => { P[sp.k] = +inp.value; update(); });
+    ctlMap[sp.k] = { sp, inp, out, box: d };
+  });
+}
+function syncControls() {
+  const rg = RANGE[P.body];
+  const dyn = { pax: rg.pax, rows: rg.rows, fuseL: rg.L, fuseD: rg.D };
+  Object.keys(dyn).forEach(k => { const c = ctlMap[k]; c.inp.min = dyn[k][0]; c.inp.max = dyn[k][1]; P[k] = clamp(P[k], dyn[k][0], dyn[k][1]); });
+  Object.values(ctlMap).forEach(c => {
+    c.inp.value = P[c.sp.k]; c.out.textContent = c.sp.fmt(P[c.sp.k]);
+    if (c.sp.show) c.box.style.display = c.sp.show() ? '' : 'none';
+  });
+  ctlMap.exitIn.inp.disabled = P.exitAuto;
+  $('#exitAuto').checked = P.exitAuto; $('#autoLayout').checked = P.autoLayout;
+  $('#secSeat').style.display = P.mode === 'seat' ? '' : 'none';
+  $('#secFuse').style.display = P.mode === 'fuse' ? '' : 'none';
+  $('#autoRow').style.display = P.mode === 'fuse' ? '' : 'none';
+  setSeg('#modeSeg', P.mode); setSeg('#bodySeg', P.body); setSeg('#basisSeg', P.basis);
+}
+function setSeg(sel, v) { document.querySelectorAll(sel + ' button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
+function bindSeg(sel, fn) { document.querySelectorAll(sel + ' button').forEach(b => b.addEventListener('click', () => fn(b.dataset.v))); }
+
+function setBody(b) {
+  P.body = b; P.layout = DEF_LAYOUT[b]; Object.assign(P, { pax: BODY_DEF[b].pax, rows: BODY_DEF[b].rows, fuseL: BODY_DEF[b].L, fuseD: BODY_DEF[b].D });
+  activePreset = null; view.auto = true;
+}
+function applyPreset(id) {
+  const ps = PRESETS.find(p => p.id === id); activePreset = id;
+  P.body = ps.body; P.layout = ps.layout; P.fuseL = ps.L; P.fuseD = ps.Do; P.autoLayout = false;
+  const dflt = BODY_DEF[ps.body]; P.pax = dflt.pax; P.rows = dflt.rows; view.auto = true;
+}
+
+/* ---------------------------------------------------------------------
+   6. LOPA 렌더링 (Canvas) — 월드 좌표(m): x = 기수에서 후방, y = 횡방향(아래=좌현)
+   --------------------------------------------------------------------- */
+const cv = $('#lopa'), ctx = cv.getContext('2d');
+const view = { s: 10, ox: 0, oy: 0, auto: true };
+let dpr = 1, dirty = true, hits = [];
+const wx = x => x * view.s + view.ox, wy = y => y * view.s + view.oy;
+
+function hwAt(x, R) {                                  // 외피 반폭 (평면도 윤곽)
+  const { Ln, Lt, Lf, Ro, pTail } = R;
+  if (x <= 0 || x >= Lf) return 0;
+  if (x < Ln) { const t = x / Ln; return Ro * Math.pow(1 - Math.pow(1 - t, 2.2), 1 / 2.2); }
+  const xt = Lf - Lt; if (x <= xt) return Ro;
+  const t = (x - xt) / Lt; return Ro * (1 - 0.92 * Math.pow(t, pTail));
+}
+function fuselagePath(R, c2) {
+  c2.beginPath();
+  const xs = [];
+  for (let i = 0; i <= 48; i++) xs.push(R.Ln * (i / 48) ** 1.6);
+  xs.push(R.Lf - R.Lt);
+  for (let i = 1; i <= 48; i++) xs.push(R.Lf - R.Lt + R.Lt * i / 48);
+  xs.forEach((x, i) => { const px = wx(x), py = wy(-hwAt(x, R)); i ? c2.lineTo(px, py) : c2.moveTo(px, py); });
+  for (let i = xs.length - 1; i >= 0; i--) c2.lineTo(wx(xs[i]), wy(hwAt(xs[i], R)));
+  c2.closePath();
+}
+function wingGeom(R) {
+  const xc = R.Ln + R.c.wingS, D = R.Do, cr = 1.6 * D, sweep = Math.tan(25 * Math.PI / 180), sp = 1.1 * D;
+  const xl = xc - 0.45 * cr, ct = 0.35 * cr;
+  return { xc, cr, sp, box: [xc - 0.5 * D, xc + 0.5 * D], poly: [[xl, R.Ro], [xl + sp * sweep, R.Ro + sp], [xl + sp * sweep + ct, R.Ro + sp], [xl + cr, R.Ro]] };
+}
+function fitView() {
+  const R = RES, w = cv.clientWidth, h = cv.clientHeight, wg = wingGeom(R);
+  const bx0 = -1.5, bx1 = R.Lf + 3.5, by = R.Ro + wg.sp, padY = 96;
+  view.s = Math.min((w - 40) / (bx1 - bx0), (h - padY - 40) / (2 * by));
+  view.ox = 20 - bx0 * view.s + ((w - 40) - (bx1 - bx0) * view.s) / 2;
+  view.oy = 24 + by * view.s + ((h - padY - 40) - 2 * by * view.s) / 2;
+}
+function resize(cnv, c2) {
+  dpr = window.devicePixelRatio || 1;
+  const w = cnv.clientWidth, h = cnv.clientHeight;
+  if (cnv.width !== Math.round(w * dpr) || cnv.height !== Math.round(h * dpr)) { cnv.width = Math.round(w * dpr); cnv.height = Math.round(h * dpr); }
+  c2.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+function rrPath(c2, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2); c2.beginPath(); c2.moveTo(x + r, y);
+  c2.arcTo(x + w, y, x + w, y + h, r); c2.arcTo(x + w, y + h, x, y + h, r); c2.arcTo(x, y + h, x, y, r); c2.arcTo(x, y, x + w, y, r); c2.closePath();
+}
+function txt(t, x, y, o = {}) {
+  ctx.font = `${o.bold ? '600 ' : ''}${o.size || 11}px ${FONT}`; ctx.fillStyle = o.color || '#cbd5e1';
+  ctx.textAlign = o.align || 'center'; ctx.textBaseline = o.base || 'middle'; ctx.fillText(t, x, y);
+}
+function fr(x0, v0, x1, v1, col) { ctx.fillStyle = col; ctx.fillRect(wx(x0), wy(v0), (x1 - x0) * view.s, (v1 - v0) * view.s); }
+function hatch(x0, v0, x1, v1, col) {
+  ctx.save(); ctx.beginPath(); ctx.rect(wx(x0), wy(v0), (x1 - x0) * view.s, (v1 - v0) * view.s); ctx.clip();
+  ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.beginPath();
+  const X0 = wx(x0), Y0 = wy(v0), W = (x1 - x0) * view.s, H = (v1 - v0) * view.s;
+  for (let k = -H; k < W; k += 8) { ctx.moveTo(X0 + k, Y0 + H); ctx.lineTo(X0 + k + H, Y0); }
+  ctx.stroke(); ctx.restore();
+}
+function dimH(x0, x1, sy, label, col) {
+  const a = wx(x0), b = wx(x1); ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(a, sy); ctx.lineTo(b, sy); ctx.moveTo(a, sy - 4); ctx.lineTo(a, sy + 4); ctx.moveTo(b, sy - 4); ctx.lineTo(b, sy + 4); ctx.stroke();
+  if (b - a > 36) txt(label, (a + b) / 2, sy - 8, { size: 11, color: col });
+}
+
+function drawLopa() {
+  resize(cv, ctx);
+  const R = RES, w = cv.clientWidth, h = cv.clientHeight;
+  ctx.clearRect(0, 0, w, h); hits = [];
+  if (!R) return;
+  if (view.auto) fitView();
+  const s = view.s, c = R.c, X = R.X, x0 = R.Ln;
+
+  /* 눈금자 (상단) */
+  const step = [1, 2, 5, 10, 20, 50].find(k => k * s >= 60) || 50;
+  ctx.strokeStyle = '#1b2638'; ctx.lineWidth = 1; ctx.beginPath();
+  for (let m = 0; m <= R.Lf + 1; m += step) { const px = wx(m); ctx.moveTo(px, 0); ctx.lineTo(px, h); }
+  ctx.stroke();
+  for (let m = 0; m <= R.Lf + 1; m += step) txt(`${m} m`, wx(m) + 3, 46, { size: 10, color: '#4b5d77', align: 'left' });
+
+  /* 주익 (참고) */
+  const wg = wingGeom(R);
+  ctx.save(); ctx.setLineDash([6, 4]); ctx.strokeStyle = '#51627b'; ctx.fillStyle = 'rgba(100,116,139,.10)'; ctx.lineWidth = 1.2;
+  [-1, 1].forEach(sg => {
+    ctx.beginPath(); wg.poly.forEach((p, i) => { const px = wx(p[0]), py = wy(sg * p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  });
+  ctx.restore();
+  txt('주익 (참고)', wx((wg.poly[1][0] + wg.poly[3][0]) / 2 + 0.3), wy(-(R.Ro + wg.sp * 0.9)), { size: 10.5, color: '#64748b' });
+
+  /* 동체 외피 */
+  fuselagePath(R, ctx); ctx.fillStyle = '#18222f'; ctx.fill(); ctx.strokeStyle = '#6b7f9c'; ctx.lineWidth = 2; ctx.stroke();
+  /* 조종실 창 */
+  const wxA = 0.50 * R.Ln, wxB = 0.76 * R.Ln;
+  ctx.fillStyle = '#7dd3fc55'; ctx.strokeStyle = '#7dd3fc'; ctx.lineWidth = 1;
+  [-1, 1].forEach(sg => {
+    ctx.beginPath(); ctx.moveTo(wx(wxA), wy(sg * 0.08 * R.Ro)); ctx.lineTo(wx(wxB), wy(sg * 0.40 * R.Ro)); ctx.lineTo(wx(wxB + 0.0), wy(sg * 0.60 * R.Ro));
+    ctx.lineTo(wx(wxA - 0.05 * R.Ln), wy(sg * 0.30 * R.Ro)); ctx.closePath(); ctx.fill(); ctx.stroke();
+  });
+  hits.push({ x0: 0, x1: R.Ln, v0: -R.Ro, v1: R.Ro, tip: `기수·조종실 구간\n길이 ${R.Ln.toFixed(2)} m (${R.P.noseK.toFixed(2)} D)` });
+
+  /* 내부 객실 */
+  ctx.save(); fuselagePath(R, ctx); ctx.clip();
+  fr(x0, -X.W / 2, x0 + c.L, X.W / 2, '#0d1520');
+  ctx.strokeStyle = '#3a4a62'; ctx.setLineDash([5, 4]); ctx.lineWidth = 1;
+  [-X.a, X.a].forEach(v => { ctx.beginPath(); ctx.moveTo(wx(x0), wy(v)); ctx.lineTo(wx(x0 + c.L), wy(v)); ctx.stroke(); });
+  ctx.setLineDash([]);
+
+  /* 윙박스 (참고) */
+  fr(wg.box[0], -X.a * 0.92, wg.box[1], X.a * 0.92, 'rgba(100,116,139,.16)');
+  hatch(wg.box[0], -X.a * 0.92, wg.box[1], X.a * 0.92, 'rgba(100,116,139,.35)');
+  hits.push({ x0: wg.box[0], x1: wg.box[1], v0: -X.a, v1: X.a, tip: `윙박스 (참고)\n객실 좌석 구간 ${(R.P.wingPos * 100).toFixed(0)}% 부근\n오버윙 출구는 이 구간에 배치` });
+
+  /* 통로 (탈출 경로) */
+  X.aisles.forEach(a => {
+    fr(x0, a.v0, x0 + c.L, a.v1, 'rgba(226,232,240,.13)');
+    ctx.strokeStyle = 'rgba(226,232,240,.22)'; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.moveTo(wx(x0), wy((a.v0 + a.v1) / 2)); ctx.lineTo(wx(x0 + c.L), wy((a.v0 + a.v1) / 2)); ctx.stroke(); ctx.setLineDash([]);
+    hits.push({ x0, x1: x0 + c.L, v0: a.v0, v1: a.v1, tip: `통로 폭 ${(R.P.aisleIn).toFixed(1)} in (${(R.P.aisleIn * IN).toFixed(3)} m)\n25.815 최소 20 in (25 in 이상 높이)` });
+  });
+
+  /* 서비스 모듈 · 도어 베이 */
+  const names = { fwd: '전방', aft: '후방', mid: '중앙' };
+  c.mods.forEach((m, idx) => {
+    const bx0 = x0 + m.s0, bx1 = x0 + m.s1;
+    fr(bx0, -X.W / 2, bx1, X.W / 2, m.kind === 'bay' ? '#1a2433' : '#162030');
+    ctx.strokeStyle = '#2b3a50'; ctx.lineWidth = 1; ctx.strokeRect(wx(bx0), wy(-X.W / 2), (bx1 - bx0) * s, X.W * s);
+    X.aisles.forEach(a => fr(bx0, a.v0, bx1, a.v1, 'rgba(226,232,240,.10)'));
+    if (m.vest) fr(x0 + m.vest[0], -X.W / 2, x0 + m.vest[1], X.W / 2, 'rgba(253,230,138,.13)');
+    m.cells.forEach(ce => {
+      const lav = ce.t === 'lav', col = lav ? '#22d3ee' : '#f59e0b';
+      const px = wx(x0 + ce.x0) + 1.5, py = wy(ce.v0) + 1.5, pw = (ce.x1 - ce.x0) * s - 3, ph = (ce.v1 - ce.v0) * s - 3;
+      if (pw <= 1 || ph <= 1) return;
+      ctx.fillStyle = col + 'cc'; rrPath(ctx, px, py, pw, ph, 3); ctx.fill();
+      ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.stroke();
+      if (pw > 22 && ph > 12) txt(lav ? 'WC' : 'G', px + pw / 2, py + ph / 2, { size: Math.min(12, ph * 0.5), color: '#06222b', bold: true });
+      hits.push({ x0: x0 + ce.x0, x1: x0 + ce.x1, v0: ce.v0, v1: ce.v1, tip: `${names[m.kind] || '도어'} ${lav ? '화장실 (Lavatory)' : '갤리 (Galley)'}\n모듈 길이 ${(m.s1 - m.s0).toFixed(2)} m` });
+    });
+    const label = m.kind === 'bay' ? '도어 베이' : `${names[m.kind]} 서비스 모듈`;
+    if ((bx1 - bx0) * s > 54) txt(label, wx((bx0 + bx1) / 2), wy(-X.W / 2) + 9, { size: 10, color: '#8b9ab0' });
+    const lab = m.kind === 'fwd' ? '전방 갤리·화장실' : m.kind === 'aft' ? '후방 갤리·화장실' : m.kind === 'mid' ? '중앙 갤리·화장실' : '도어 베이';
+    hits.push({ x0: bx0, x1: bx1, v0: -X.W / 2, v1: X.W / 2, tip: `${lab}\n길이 ${(m.s1 - m.s0).toFixed(2)} m${m.vest ? '\n비상 도어 베스티뷸 포함' : ''}${m.lav != null ? `\n화장실 ${m.lav} · 갤리 ${m.gal}` : ''}` });
+  });
+
+  /* 미사용 길이 (동체 주도) */
+  if (c.slackIv) {
+    hatch(x0 + c.slackIv[0], -X.W / 2, x0 + c.slackIv[1], X.W / 2, 'rgba(148,163,184,.30)');
+    if ((c.slackIv[1] - c.slackIv[0]) * s > 80) txt(`미사용 길이 ${(c.slackIv[1] - c.slackIv[0]).toFixed(2)} m`, wx(x0 + (c.slackIv[0] + c.slackIv[1]) / 2), wy(0), { size: 11, color: '#94a3b8' });
+    hits.push({ x0: x0 + c.slackIv[0], x1: x0 + c.slackIv[1], v0: -X.W / 2, v1: X.W / 2, tip: `미사용 길이 ${(c.slackIv[1] - c.slackIv[0]).toFixed(2)} m\n한 행을 더 넣기에는 부족한 구간` });
+  }
+
+  /* 좌석열 */
+  const pxRow = P.pitchIn * IN * s;
+  const rowStep = pxRow >= 13 ? 1 : pxRow >= 6 ? 2 : pxRow >= 3 ? 5 : 10;
+  const detail = s >= 14, letters = s >= 36;
+  const total = X.seats.length;
+  c.rowsArr.forEach(rw => {
+    const sx0 = x0 + rw.s0, sx1 = sx0 + rw.depth;
+    if (wx(sx1) < -20 || wx(sx0) > w + 20) return;
+    X.els.forEach(e => {
+      if (e.t === 'arm') { if (detail) fr(sx0 + rw.depth * 0.12, e.v0, sx1 - rw.depth * 0.05, e.v1, '#94a3b8'); return; }
+      const px = wx(sx0), py = wy(e.v0) + 0.5, pw = rw.depth * s, ph = (e.v1 - e.v0) * s - 1;
+      ctx.fillStyle = rw.exit ? '#5b8cff' : '#2f6df0';
+      if (detail) { rrPath(ctx, px, py, pw, ph, Math.min(4, pw / 4)); ctx.fill(); ctx.fillStyle = rw.exit ? '#3d63c9' : '#2250c0'; ctx.fillRect(px + pw * 0.74, py + 1, pw * 0.26, ph - 2); }
+      else ctx.fillRect(px, py, pw + 0.5, ph);
+      if (letters) txt(LETTERS[total - 1 - e.order], px + pw * 0.36, py + ph / 2, { size: Math.min(11, ph * 0.5), color: '#dbeafe', bold: true });
+    });
+    /* 오버윙 출구열 탈출 경로 */
+    if (rw.exit) {
+      const gx0 = sx1, gx1 = x0 + rw.s1, pw2 = Math.min(gx1 - gx0, Math.max(0.35, c.extra));
+      const cx = (gx0 + gx1) / 2;
+      [X.regions[0], X.regions[X.regions.length - 1]].forEach((rg, i) => {
+        const v0 = i === 0 ? rg.v0 : rg.v0, v1 = rg.v1;
+        fr(cx - pw2 / 2, v0, cx + pw2 / 2, v1, 'rgba(253,230,138,.30)');
+      });
+    }
+    /* 행 번호 */
+    if (rw.n % rowStep === 0 || rw.n === 1) {
+      X.aisles.forEach(a => txt(String(rw.n), wx(sx0 + rw.depth / 2), wy((a.v0 + a.v1) / 2), { size: Math.min(11, Math.max(8, s * 0.32)), color: '#e2e8f0' }));
+    }
+    hits.push({ x0: sx0, x1: x0 + rw.s1, v0: -X.W / 2, v1: X.W / 2, row: rw });
+  });
+  ctx.restore();
+
+  /* 비상탈출구 (좌/우) */
+  c.exits.forEach((e, ei) => {
+    const ex = x0 + e.s, w0 = doorW(e.type), hh = hwAt(ex, R);
+    const showSub = s >= 9 && !c.exits.some((o, oi) => oi < ei && Math.abs(o.s - e.s) * s < 80);
+    [-1, 1].forEach(sg => {
+      const sx = wx(ex), sy = wy(sg * hh);
+      ctx.fillStyle = '#22c55e'; ctx.fillRect(sx - w0 * s / 2, sg > 0 ? sy - 4 : sy - 1, w0 * s, 5);
+      const len = 24;
+      ctx.strokeStyle = '#22c55e'; ctx.fillStyle = '#22c55e'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(sx, sy + sg * 4); ctx.lineTo(sx, sy + sg * len); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sx, sy + sg * (len + 6)); ctx.lineTo(sx - 5, sy + sg * (len - 3)); ctx.lineTo(sx + 5, sy + sg * (len - 3)); ctx.closePath(); ctx.fill();
+      txt('EXIT', sx, sy + sg * (len + 16), { size: 10.5, color: '#4ade80', bold: true });
+      if (showSub) txt(e.kind === 'ow' ? '오버윙 비상구' : '비상탈출구', sx + (e.kind === 'ow' ? w0 * s * 0.5 : 0), sy + sg * (len + 28), { size: 9.5, color: '#86efac' });
+    });
+    const T = TYPE[e.type];
+    hits.push({ x0: ex - w0 / 2 - 0.1, x1: ex + w0 / 2 + 0.1, v0: -hh - 1.2, v1: -hh + 0.4, tip: exitTip(e, T) });
+    hits.push({ x0: ex - w0 / 2 - 0.1, x1: ex + w0 / 2 + 0.1, v0: hh - 0.4, v1: hh + 1.2, tip: exitTip(e, T) });
+  });
+
+  /* 치수선 */
+  const by = wy(R.Ro + wg.sp) + 30;
+  const colD = '#7f93ad';
+  dimH(0, R.Ln, by, `기수 ${R.Ln.toFixed(1)} m`, colD);
+  dimH(R.Ln, R.Ln + c.L, by, `객실 ${c.L.toFixed(1)} m`, colD);
+  dimH(R.Lf - R.Lt, R.Lf, by + 20, `꼬리 ${R.Lt.toFixed(1)} m (객실 중첩 ${R.ov.toFixed(1)} m)`, colD);
+  dimH(0, R.Lf, by + 40, `전장 L = ${R.Lf.toFixed(2)} m`, '#cbd5e1');
+  const vx = wx(R.Lf) + 22;
+  ctx.strokeStyle = colD; ctx.beginPath(); ctx.moveTo(vx, wy(-R.Ro)); ctx.lineTo(vx, wy(R.Ro)); ctx.moveTo(vx - 4, wy(-R.Ro)); ctx.lineTo(vx + 4, wy(-R.Ro)); ctx.moveTo(vx - 4, wy(R.Ro)); ctx.lineTo(vx + 4, wy(R.Ro)); ctx.stroke();
+  ctx.save(); ctx.translate(vx + 10, wy(0)); ctx.rotate(-Math.PI / 2); txt(`외경 D = ${R.Do.toFixed(2)} m`, 0, 0, { size: 11, color: '#cbd5e1' }); ctx.restore();
+  txt('◀ 전방', wx(0) + 4, wy(-R.Ro) - 14, { size: 11, color: '#64748b', align: 'left' });
+}
+function exitTip(e, T) {
+  return `${e.kind === 'ow' ? '오버윙 비상구' : '비상탈출구'} (${T.nm}) · 좌/우 1쌍\n개구부 ${T.w}×${T.h} in\n개소당 좌석 상한 ${T.cap}석 (25.807(g))`;
+}
+function hitTest(wxm, wym) {
+  const R = RES; if (!R) return null;
+  for (let i = hits.length - 1; i >= 0; i--) {
+    const h = hits[i];
+    if (wxm >= h.x0 && wxm <= h.x1 && wym >= h.v0 && wym <= h.v1) {
+      if (h.row) {
+        const X = R.X; const el = X.els.find(e => e.t === 'seat' && wym >= e.v0 && wym <= e.v1);
+        if (!el) continue;
+        const letter = LETTERS[X.seats.length - 1 - el.order];
+        return `좌석 ${h.row.n}${letter} · 이코노미\n좌석 폭 ${R.P.seatIn.toFixed(1)} in · 피치 ${(h.row.alloc / IN).toFixed(1)} in${h.row.exit ? '\n오버윙 비상구열 (추가 피치 포함)' : ''}`;
+      }
+      return h.tip;
+    }
+  }
+  return null;
+}
+
+/* 뷰 인터랙션: 휠 줌(커서 기준) · 드래그 팬 · 핀치 · 더블클릭 초기화 */
+const ptrs = new Map(); let lastDist = 0;
+function zoomAt(mx, my, f) {
+  const ns = clamp(view.s * f, 1.5, 600); f = ns / view.s;
+  view.ox = mx - (mx - view.ox) * f; view.oy = my - (my - view.oy) * f; view.s = ns; view.auto = false; dirty = true;
+}
+cv.addEventListener('wheel', e => { e.preventDefault(); const r = cv.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); cv.classList.add('drag'); lastDist = 0; });
+cv.addEventListener('pointermove', e => {
+  const r = cv.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  if (ptrs.has(e.pointerId)) {
+    const p = ptrs.get(e.pointerId), dx = e.clientX - p.x, dy = e.clientY - p.y;
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 1) { view.ox += dx; view.oy += dy; view.auto = false; dirty = true; $('#tip').style.display = 'none'; }
+    else if (ptrs.size === 2) {
+      const [a, b] = [...ptrs.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (lastDist) zoomAt((a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top, d / lastDist);
+      lastDist = d;
+    }
+    return;
+  }
+  const t = hitTest((mx - view.ox) / view.s, (my - view.oy) / view.s), tip = $('#tip');
+  if (t) { tip.textContent = t; tip.style.display = 'block'; tip.style.left = Math.min(e.clientX + 14, innerWidth - 300) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; }
+  else tip.style.display = 'none';
+});
+const endPtr = e => { ptrs.delete(e.pointerId); cv.classList.remove('drag'); lastDist = 0; };
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('pointerleave', () => { $('#tip').style.display = 'none'; });
+cv.addEventListener('dblclick', () => { view.auto = true; dirty = true; });
+$('#vreset').onclick = () => { view.auto = true; dirty = true; };
+$('#zin').onclick = () => zoomAt(cv.clientWidth / 2, cv.clientHeight / 2, 1.3);
+$('#zout').onclick = () => zoomAt(cv.clientWidth / 2, cv.clientHeight / 2, 1 / 1.3);
+
+/* ---------------------------------------------------------------------
+   7. 단면도 렌더링
+   --------------------------------------------------------------------- */
+const xv = $('#xsec'), xc = xv.getContext('2d');
+function xt(t, x, y, o = {}) {
+  xc.font = `${o.bold ? '600 ' : ''}${o.size || 11}px ${FONT}`; xc.fillStyle = o.color || '#cbd5e1'; xc.textAlign = o.align || 'center'; xc.textBaseline = o.base || 'middle'; xc.fillText(t, x, y);
+}
+function drawCross() {
+  resize(xv, xc);
+  const R = RES, X = R.X, w = xv.clientWidth, h = xv.clientHeight;
+  xc.clearRect(0, 0, w, h);
+  const outerH = 2 * (X.b + X.shell), outerW = X.Do;
+  const sc = Math.min((w - 150) / outerW, (h - 190) / outerH);
+  const ox = w / 2 - 6, oy = 46 + outerH * sc / 2, floorY = oy + X.f * sc;
+  const SX = v => ox + v * sc, SZ = z => floorY - z * sc;
+  const red = '#f87171';
+
+  /* 외피 · 내벽 */
+  xc.beginPath(); xc.ellipse(ox, oy, (X.a + X.shell) * sc, (X.b + X.shell) * sc, 0, 0, Math.PI * 2);
+  xc.fillStyle = '#1d2a3b'; xc.fill(); xc.strokeStyle = R.noFit ? red : '#7287a6'; xc.lineWidth = 2; if (R.noFit) xc.setLineDash([6, 4]); xc.stroke(); xc.setLineDash([]);
+  xc.beginPath(); xc.ellipse(ox, oy, X.a * sc, X.b * sc, 0, 0, Math.PI * 2);
+  xc.fillStyle = '#0d1520'; xc.fill(); xc.strokeStyle = '#415671'; xc.lineWidth = 1; xc.stroke();
+  /* 하부 화물칸 (참고) */
+  xc.save(); xc.beginPath(); xc.ellipse(ox, oy, X.a * sc, X.b * sc, 0, 0, Math.PI * 2); xc.clip();
+  xc.fillStyle = '#080d14'; xc.fillRect(0, floorY + 0.12 * sc, w, h);
+  xt('하부 화물칸 (참고)', ox, floorY + 0.12 * sc + (oy + X.b * sc - floorY) / 2 + 2, { size: 10.5, color: '#4b5d77' });
+  xc.restore();
+  /* 바닥 */
+  const chord = Math.sqrt(Math.max(0, 1 - (X.f / X.b) ** 2)) * X.a;
+  xc.fillStyle = '#334156'; xc.fillRect(SX(-chord), floorY, 2 * chord * sc, 0.12 * sc);
+  xc.strokeStyle = '#25324a'; xc.setLineDash([3, 4]); xc.beginPath(); xc.moveTo(ox, oy - 8); xc.lineTo(ox, oy + 8); xc.moveTo(ox - 8, oy); xc.lineTo(ox + 8, oy); xc.stroke(); xc.setLineDash([]);
+
+  /* 통로 · 팔걸이 · 좌석 */
+  const inside = (v, z) => (v / X.a) ** 2 + ((z - X.f) / X.b) ** 2 <= 1.0001;
+  X.aisles.forEach(a => {
+    xc.fillStyle = 'rgba(253,230,138,.12)'; xc.fillRect(SX(a.v0), SZ(1.9), (a.v1 - a.v0) * sc, 1.9 * sc);
+    xc.strokeStyle = 'rgba(253,230,138,.55)'; xc.setLineDash([3, 3]); xc.strokeRect(SX(a.v0), SZ(1.9), (a.v1 - a.v0) * sc, 1.9 * sc); xc.setLineDash([]);
+    xt('통로', SX((a.v0 + a.v1) / 2), SZ(1.05), { size: 10, color: '#fde68a' });
+    xt(`${R.P.aisleIn.toFixed(0)} in`, SX((a.v0 + a.v1) / 2), SZ(1.05) + 12, { size: 10, color: '#fde68a' });
+  });
+  X.els.forEach(e => {
+    const bad = !inside(e.t === 'seat' ? (Math.abs(e.v0) > Math.abs(e.v1) ? e.v0 : e.v1) : (Math.abs(e.v0) > Math.abs(e.v1) ? e.v0 : e.v1), ARM_H);
+    if (e.t === 'arm') { xc.fillStyle = bad ? red : '#94a3b8'; xc.fillRect(SX(e.v0), SZ(ARM_H), (e.v1 - e.v0) * sc, ARM_H * sc); }
+    else {
+      xc.fillStyle = bad ? '#b91c1c' : '#2f6df0'; xc.fillRect(SX(e.v0), SZ(0.45), (e.v1 - e.v0) * sc, 0.45 * sc);
+      const m = (e.v1 - e.v0) * 0.1; xc.fillStyle = bad ? '#991b1b' : '#2250c0'; xc.fillRect(SX(e.v0 + m), SZ(1.12), (e.v1 - e.v0 - 2 * m) * sc, 0.67 * sc);
+    }
+  });
+
+  /* 치수선 */
+  const dc = '#9fb0c6';
+  const hl = (v0, v1, y, label, col = dc) => {
+    xc.strokeStyle = col; xc.lineWidth = 1; xc.beginPath(); xc.moveTo(SX(v0), y); xc.lineTo(SX(v1), y); xc.moveTo(SX(v0), y - 4); xc.lineTo(SX(v0), y + 4); xc.moveTo(SX(v1), y - 4); xc.lineTo(SX(v1), y + 4); xc.stroke();
+    xt(label, SX((v0 + v1) / 2), y - 9, { size: 11, color: col });
+  };
+  hl(-X.Do / 2, X.Do / 2, oy - outerH * sc / 2 - 12, `외경 D = ${X.Do.toFixed(2)} m`, '#e2e8f0');
+  /* 쉘 두께 콜아웃 */
+  const sxL = ox - (X.a + X.shell / 2) * sc * Math.cos(0.5), syL = oy - (X.b + X.shell / 2) * sc * Math.sin(0.5);
+  xc.strokeStyle = '#64748b'; xc.beginPath(); xc.moveTo(sxL, syL); xc.lineTo(sxL - 22, syL - 16); xc.stroke();
+  xt(`쉘 ${R.P.shellIn.toFixed(1)} in`, sxL - 24, syL - 20, { size: 10.5, align: 'right', color: '#cbd5e1' });
+  /* 높이 치수 */
+  const vx = ox + (X.a + X.shell) * sc + 18;
+  xc.strokeStyle = dc; xc.beginPath(); xc.moveTo(vx, floorY); xc.lineTo(vx, oy - X.b * sc); xc.moveTo(vx - 4, floorY); xc.lineTo(vx + 4, floorY); xc.moveTo(vx - 4, oy - X.b * sc); xc.lineTo(vx + 4, oy - X.b * sc); xc.stroke();
+  xt(`H ${(X.f + X.b).toFixed(2)} m`, vx + 6, (floorY + oy - X.b * sc) / 2, { size: 10.5, align: 'left' });
+  xt('(중심선)', vx + 6, (floorY + oy - X.b * sc) / 2 + 13, { size: 9.5, align: 'left', color: '#6b7f9c' });
+
+  /* 하단 가로 구성 띠: 여유 · 팔걸이 · 좌석 · 통로 — 전체 길이 = 객실 폭 W */
+  const by = oy + outerH * sc / 2 + 26;
+  xt('가로 구성 (in)', SX(-X.W / 2), by - 11, { size: 10, color: '#8b9ab0', align: 'left' });
+  let v = -X.W / 2;
+  const seg = (len, col, lab) => {
+    const px = SX(v), pw = len * sc; xc.fillStyle = col; xc.fillRect(px, by, pw - 0.6, 16);
+    if (lab && pw > 20) xt(lab, px + pw / 2, by + 8.5, { size: 9.5, color: '#04101c', bold: true });
+    v += len;
+  };
+  seg(X.clr, '#475569', (R.P.clrIn).toFixed(1));
+  X.layout.forEach((n, gi) => {
+    if (gi > 0) seg(X.aisle, '#fde68a', R.P.aisleIn.toFixed(0));
+    for (let i = 0; i <= n; i++) { seg(X.arm, '#94a3b8', ''); if (i < n) seg(X.seat, '#5b8cff', R.P.seatIn.toFixed(0)); }
+  });
+  seg(X.clr, '#475569', (R.P.clrIn).toFixed(1));
+  hl(-X.W / 2, X.W / 2, by + 34, `객실 폭 W = ${X.W.toFixed(2)} m`);
+  xt(`내경 Di = ${X.Di.toFixed(2)} m  (곡률 보정 ${X.margin >= 0 ? '+' : '−'}${Math.abs(X.margin * 100).toFixed(0)} cm)`, ox, by + 56, { size: 10.5, color: '#7dd3fc' });
+  xt(`여유 ${R.P.clrIn.toFixed(1)} · 팔걸이 ${R.P.armIn.toFixed(1)} · 좌석 ${R.P.seatIn.toFixed(1)} · 통로 ${R.P.aisleIn.toFixed(1)} (in)`, ox, by + 72, { size: 10.5, color: '#8b9ab0' });
+  if (R.noFit) xt('⚠ 입력 직경에 배열이 들어가지 않습니다 (빨간색 = 단면 초과)', ox, by + 90, { size: 11, color: red });
+}
+
+/* ---------------------------------------------------------------------
+   8. 패널 갱신 (KPI · 규칙 · 기준 기종 비교)
+   --------------------------------------------------------------------- */
+const f2 = (v, d = 2) => v.toFixed(d);
+function updatePanels() {
+  const R = RES, c = R.c, X = R.X;
+  $('#kPax').textContent = R.pax;
+  $('#kPaxD').textContent = `${R.layoutStr} × ${R.rows}행` + (R.targetPax != null && R.targetPax !== R.pax ? ` (목표 ${R.targetPax} → 행 단위 올림)` : '');
+  $('#kLen').textContent = f2(R.Lf);
+  $('#kLenD').textContent = `기수 ${f2(R.Ln, 1)} + 객실 ${f2(c.L, 1)} + 꼬리 ${f2(R.Lt, 1)} − 중첩 ${f2(R.ov, 1)}`;
+  $('#kDia').textContent = f2(R.Do);
+  $('#kDiaD').textContent = `객실 폭 ${f2(X.W)} · 내경 ${f2(X.Di)} · 쉘 ${f2(R.P.shellIn, 1)} in`;
+  $('#kLD').textContent = f2(R.ratio, 1);
+  $('#kLDD').textContent = `객실 길이/폭 ${f2(c.L / X.W, 1)}`;
+  const upg = c.upgraded ? ' (보강)' : '';
+  const nDoor = c.exits.filter(e => e.kind === 'door').length, nOw = c.exits.filter(e => e.kind === 'ow').length;
+  const tierName = `${TYPE[c.doorType].nm} ${nDoor}쌍` + (nOw ? ` + 오버윙 III ${nOw}쌍` : '');
+  $('#chips').innerHTML = [
+    ['객실 길이', f2(c.L) + ' m'], ['행 수', R.rows], ['화장실', c.nLav], ['갤리', c.nGal],
+    ['출구', `${c.exits.length}쌍 · ${tierName}${upg}`], ['출구 용량', c.capacity + '석'], ['최대 출구 간격', f2(c.gapMax, 1) + ' m'],
+    ...(R.P.mode === 'fuse' ? [['미사용 길이', f2(R.slack) + ' m']] : [])
+  ].map(([k, v]) => `<span class="chip">${k} <b>${v}</b></span>`).join('');
+
+  const bn = $('#banner');
+  if (R.noFit) {
+    bn.className = 'banner on';
+    bn.textContent = `입력 직경 ${f2(R.P.fuseD)} m 에는 ${R.layoutStr} 배열(필요 ${f2(X.DoReq)} m)이 들어가지 않아 승객 수를 0으로 표시합니다. ` + (R.hintSeat != null ? `이 직경에 맞추려면 좌석 폭을 ${R.hintSeat.toFixed(1)} in 이하로 줄이거나 쉘·여유를 조정하세요. ` : '좌석 폭 14 in 로도 맞지 않습니다. ');
+    if (R.hintSeat != null) {
+      const bt = document.createElement('button'); bt.className = 'btn'; bt.style.cssText = 'padding:2px 10px;margin-left:6px;font-size:12px';
+      bt.textContent = `좌석 폭 ${R.hintSeat.toFixed(1)} in 로 맞추기`; bt.onclick = () => { P.seatIn = R.hintSeat; update(); };
+      bn.appendChild(bt);
+    }
+  }
+  else if (R.noLen) { bn.className = 'banner on'; bn.textContent = '입력 전장이 기수·꼬리·최소 서비스 모듈에도 부족합니다. 전장을 늘리세요.'; }
+  else if (c.upgraded) { bn.className = 'banner on info'; bn.textContent = '출구 간격이 60 ft(18.29 m)를 넘어 오버윙/중앙 출구를 자동 보강했습니다.'; }
+  else bn.className = 'banner';
+
+  $('#rules').innerHTML = R.checks.map(k => `<li class="${k.st}" title="${k.ref}"><span class="dot"></span><div><div class="t">${k.title}</div><div class="dtl">${k.detail}</div><div class="ref">${k.ref}</div></div></li>`).join('');
+
+  /* 레이아웃 핀 */
+  const pills = $('#layoutPills'); pills.innerHTML = '';
+  LAYOUTS[P.body].forEach(ls => {
+    const b = document.createElement('button'); b.className = 'pill'; b.type = 'button';
+    const xr = cross(parse(ls), P, null), fit = P.mode !== 'fuse' || xr.DoReq <= P.fuseD + 1e-9;
+    b.innerHTML = `${ls}<small>${f2(xr.DoReq)} m${P.mode === 'fuse' ? (fit ? ' ✓' : ' ✗') : ''}</small>`;
+    if (ls === R.layoutStr) b.classList.add('on'); if (!fit) b.classList.add('nofit');
+    b.title = `${ls} (${sum(parse(ls))}열) — 필요 외경 ${f2(xr.DoReq)} m`;
+    b.onclick = () => { P.layout = ls; if (P.mode === 'fuse') P.autoLayout = false; activePreset = null; view.auto = true; update(); };
+    pills.appendChild(b);
+  });
+  updateCompare();
+}
+function errCls(e) { const a = Math.abs(e); return a <= 3 ? 'ok' : a <= 8 ? 'warn' : 'bad'; }
+function updateCompare() {
+  const host = $('#cmp'), ps = PRESETS.find(p => p.id === activePreset);
+  if (!ps) { host.innerHTML = '<p class="small">좌측 “기준 기종 불러오기”에서 기종을 선택하세요. 현재 설정으로 계산한 값과 Airbus 공식 제원의 오차를 보여줍니다.</p>'; return; }
+  const X = cross(parse(ps.layout), P, null);
+  const Ln = P.noseK * X.DoReq, Lt = P.tailK * X.DoReq, ov = Math.min(P.overlapK * X.DoReq, Lt);
+  const row = (nm, sim, ref, unit = 'm') => {
+    if (ref == null) return `<tr><td>${nm}</td><td>${f2(sim)}</td><td>—</td><td>—</td></tr>`;
+    const e = (sim - ref) / ref * 100; return `<tr><td>${nm}</td><td>${f2(sim)}</td><td>${f2(ref)}</td><td class="err ${errCls(e)}">${e >= 0 ? '+' : ''}${f2(e, 1)}%</td></tr>`;
+  };
+  /* 공식 객실 길이·전장 안에서 시뮬레이터가 넣을 수 있는 최대 승객 (참고값) */
+  const maxRows = Lmax => { let r = 0; for (let i = 1; i <= 200; i++) { if (cabin(i, X, P, 0).L > Lmax) break; r = i; } return r; };
+  const availRef = ps.L - P.noseK * ps.Do - P.tailK * ps.Do + Math.min(P.overlapK * ps.Do, P.tailK * ps.Do);
+  const paxL = ps.Lcab != null ? maxRows(ps.Lcab) * X.ab : null, paxF = maxRows(availRef) * X.ab;
+  host.innerHTML = `<table><thead><tr><th>${ps.name} (${ps.layout})</th><th>시뮬</th><th>공식</th><th>오차</th></tr></thead><tbody>
+    ${row('동체 외경 (m)', X.DoReq, ps.Do)}
+    ${row('객실 최대폭 vs 내경 (m)', X.DiReq, ps.Wcab)}
+    ${ps.Lcab != null ? row('비객실 길이 = 전장−객실 (m)', Ln + Lt - ov, ps.L - ps.Lcab) : '<tr><td>비객실 길이 (m)</td><td colspan=3 class="small">객실 길이 공식값 미확인</td></tr>'}
+    <tr><td>세장비 L/D (공식 전장 기준)</td><td colspan="2">${f2(ps.L / ps.Do, 1)}</td><td></td></tr>
+    ${paxL != null ? `<tr><td>공식 객실 길이 안 최대 승객 (시뮬, 참고)</td><td colspan="2">${paxL}석</td><td></td></tr>` : ''}
+    <tr><td>공식 전장 안 최대 승객 (시뮬, 참고)</td><td colspan="2">${paxF}석</td><td></td></tr></tbody></table>
+    <p class="small" style="margin:8px 0 0">공식 값은 Airbus 제품 페이지의 전장·객실 길이·동체 폭·최대 객실 폭입니다. 승객 수는 모델 계산 참고값이며 공식 좌석 수가 아닙니다. 3% 이내 초록 · 8% 이내 노랑.</p>`;
+}
+
+/* ---------------------------------------------------------------------
+   9. 갱신 루프
+   --------------------------------------------------------------------- */
+function update() {
+  RES = solve(P);
+  syncControls(); updatePanels(); dirty = true;
+}
+function frame() {
+  if (dirty) { dirty = false; drawLopa(); drawCross(); }
+  requestAnimationFrame(frame);
+}
+new ResizeObserver(() => { dirty = true; }).observe(cv);
+new ResizeObserver(() => { dirty = true; }).observe(xv);
+
+function init() {
+  mkSliders($('#slSeat'), SLIDERS.seat); mkSliders($('#slFuse'), SLIDERS.fuse);
+  mkSliders($('#slCommon'), SLIDERS.common); mkSliders($('#slAdv'), SLIDERS.adv); mkSliders($('#slAdv2'), SLIDERS.adv2);
+  bindSeg('#modeSeg', v => { P.mode = v; view.auto = true; update(); });
+  bindSeg('#bodySeg', v => { setBody(v); update(); });
+  bindSeg('#basisSeg', v => { P.basis = v; update(); });
+  $('#autoLayout').onchange = e => { P.autoLayout = e.target.checked; view.auto = true; update(); };
+  $('#exitAuto').onchange = e => { P.exitAuto = e.target.checked; update(); };
+  $('#presets').innerHTML = PRESETS.map(p => `<button class="btn" data-id="${p.id}" title="${p.name}: 전장 ${p.L} m · 동체 폭 ${p.Do} m · 최대 객실 폭 ${p.Wcab} m">${p.name}</button>`).join('');
+  document.querySelectorAll('#presets button').forEach(b => b.onclick = () => { applyPreset(b.dataset.id); update(); });
+  $('#resetAll').onclick = () => { P = Object.assign({}, DEF); activePreset = null; view.auto = true; update(); };
+  update(); requestAnimationFrame(frame);
+}
+
+/* 자가 테스트 — 콘솔에서 확인 (실패 시 console.assert 경고) */
+function selfTest() {
+  const t = (ok, msg) => { console.assert(ok, '자가 테스트 실패: ' + msg); return ok; };
+  const q = Object.assign({}, DEF);
+  t(Math.abs(18 * IN - 0.4572) < 1e-9 && Math.abs(60 * FT - 18.288) < 1e-9, '단위 환산');
+  const x = cross([3, 3], q, null);
+  t(x.nArm === 8 && Math.abs(x.W - (6 * 18 + 8 * 2 + 20 + 7) * IN) < 1e-9, '3-3 팔걸이 8개·객실 폭');
+  t(x.DoReq > x.W + 2 * q.shellIn * IN - 1e-9, '곡률 보정은 0 이상');
+  t(cross([2, 4, 2], q, null).nAisle === 2, '광동체 통로 2개');
+  t(tierFor(100) === 1 && tierFor(101) === 2 && tierFor(180) === 2 && tierFor(181) === 3 && tierFor(361) === 4, '출구 단계 경계');
+  const r = solve(q);
+  t(r.pax === 180 && r.rows === 30 && r.c.tier === 2 && r.c.exits.length === 4 && r.c.gapOK, '기본값: 180석 · 30행 · 출구 4쌍(단계 2)');
+  t(r.c.capacity >= 180, '출구 용량');
+  const f = solve(Object.assign({}, q, { mode: 'fuse', fuseL: 40, fuseD: 4.3, autoLayout: true }));
+  t(f.layoutStr === '3-3' && !f.noFit && f.pax > 0 && f.c.L <= 40 - f.Ln - f.Lt + f.ov + 1e-9, '동체 주도: 4.3 m → 3-3, 길이 내 배치');
+  t(solve(Object.assign({}, q, { mode: 'fuse', fuseL: 40, fuseD: 3.95, autoLayout: true })).layoutStr === '3-2', '동체 주도: 3.95 m 에는 3-3 이 들어가지 않음(기본 치수 기준)');
+  t(Math.abs(f.Lf - 40) < 1e-9, '동체 주도 전장 유지');
+  console.log('자가 테스트 완료', { 기본값_전장: +r.Lf.toFixed(2), 기본값_외경: +r.Do.toFixed(3) });
+}
+selfTest(); init();
+window.__sim = { get P() { return P; }, get R() { return RES; }, solve, cross, cabin, update, view };
+</script>
+</body>
+</html>
