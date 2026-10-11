@@ -173,7 +173,7 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
   </div>
 
   <div class="sec"><h2>치수 연동 입력</h2>
-    <p class="small" style="margin:0 0 10px">승객 수·행 수·전장·외경은 서로 연동됩니다. 마지막으로 조작한 값(<b style="color:var(--acc)">기준</b>)에서 나머지가 자동 계산됩니다. 숫자를 직접 입력해도 됩니다. 승객 수가 현재 배열의 한계를 넘으면 더 큰 배열·광동체로 자동 전환하고, 줄이면 원래 구성으로 돌아갑니다.</p>
+    <p class="small" style="margin:0 0 10px">승객 수·행 수·전장·외경은 서로 연동됩니다. 마지막으로 조작한 값(<b style="color:var(--acc)">기준</b>)에서 나머지가 자동 계산됩니다. 숫자를 직접 입력해도 됩니다. 승객 수가 현재 배열의 한계를 넘으면 더 큰 배열·광동체로 자동 전환하고, 줄이면 원래 구성으로 돌아갑니다. 쉘·좌석 폭 같은 단면 값을 바꿔도 <b>외경은 고정</b>되고 안쪽 공간과 배열만 변합니다.</p>
     <div id="slDrive"></div>
   </div>
 
@@ -229,6 +229,7 @@ th{color:var(--mut);font-weight:500;font-size:11.5px}
       <ul>
         <li><b>화면</b>: 화면 오른쪽 위 해/달 아이콘으로 라이트·다크를 바꿉니다(처음에는 OS·브라우저 설정을 따르고, 한 번 바꾸면 이 브라우저에 저장). 라이트 모드의 글자는 모두 어두운 색이며 LOPA·단면 캔버스 색도 모드에 따라 바뀝니다. 기종은 “제작사 → 기종” 드롭다운(계열별 묶음)으로 고르고, 동체 형식과 좌석 배열은 한 드롭다운(협동체/광동체 묶음, 항목마다 열 수·필요 외경)으로 고릅니다. Boeing 항목은 자리만 있으며 기종이 없어 “---”로 표시됩니다.</li>
         <li><b>프리셋·커스텀</b>: Airbus 공식 프리셋은 스펙에 맞춰져 있어 <b>조회 전용</b>(입력 전부 비활성)이며, 고를 때마다 기본값에서 시작해 공식 보정값만 적용하므로 이전 작업값이 섞이지 않습니다. “커스텀” 제작사에는 항상 조정 가능한 <b>작업 설정</b>(저장 안 함)과 직접 만든 <b>커스텀 기종</b>이 있습니다. “＋ 커스텀”은 지금 보고 있는 기종(프리셋·작업 설정·다른 커스텀)을 복사해 새 커스텀 기종을 만들고, 이름 변경·삭제가 가능합니다. 프리셋을 보러 갔다 와도 조정 중이던 상태(저장 안 된 변경 포함)는 그대로 유지되고(“돌아가기” 버튼), <b>저장</b>을 눌러야 이 브라우저(localStorage)에 보관되며 <b>변경 취소</b>로 마지막 저장본으로 되돌립니다. 저장 안 된 변경은 새로고침하면 사라지고, 저장소를 쓸 수 없는 환경에서는 이번 세션에만 유지됩니다.</li>
+        <li><b>외경(바깥 라인) 고정</b>: 쉘 두께·측벽 여유·좌석 폭·팔걸이·통로·바닥 위치·종횡비를 바꿔도 <b>외경은 그대로</b>이고 안쪽(내경 = 외경 − 2×쉘)만 변합니다 — 쉘이 두꺼워지면 안쪽으로 늘어납니다. 객실 폭이 내경보다 커지면 들어가는 최대 배열로 자동 축소하고(3-3 → 3-2 …, 안내 배너·단면 적합 검사에 표시), 값을 되돌리면 원래 배열로 돌아옵니다(“외경을 바꾸면…자동 선택”을 끄면 지정한 배열이 상한). 외경이 새로 정해지는 경우는 배열·형식을 직접 고를 때, 목표 승객 수가 배열 한계를 넘어 자동 전환될 때, 기종 프리셋을 불러올 때, 외경을 직접 입력할 때뿐입니다. 외경 고정 중 전장이 슬라이더 상한을 넘으면 외경을 바꾸지 않고 안내만 표시합니다.</li>
         <li><b>치수 연동</b>: 승객 수·행 수·전장·외경은 하나의 상태에서 서로 계산됩니다. 마지막으로 조작한 값이 <b>기준</b>이고 나머지는 <b>자동</b>입니다 — 승객 수·행 수를 바꾸면 전장(과 배열의 필요 외경)이, 전장·외경을 바꾸면 승객 수·행 수(와 배열)가 따라 움직입니다. 피치·좌석 폭·통로 같은 다른 값도 같은 상태를 거치므로 결과가 즉시 반영됩니다. 승객 수의 한계는 고정값이 아니라 <b>현재 배열·피치·좌석 폭으로 전장 슬라이더 상한(협동체 60 m · 광동체 90 m, 모델 범위)까지 배치되는 행 수</b>로 계산합니다(예: 3-3 · 피치 31 in → 최대 306석). 목표 승객 수가 현재 배열의 한계를 넘으면 가로 좌석 수가 더 많은 배열(협동체 2-2 → 3-2 → 3-3 → 광동체 2-3-2 → 2-4-2 → 3-3-3 → 3-4-3)로 자동 전환하며, 광동체로 넘어갈 때는 광동체 기본 통로 20 in · 쉘 6 in를 적용합니다. 승객 수를 줄이면 원래 구성(통로·쉘 값 포함)으로 돌아갑니다. 기종 프리셋은 공식 전장·외경을 기준으로 승객 수를 계산합니다. 전장 상한은 설계 가정이며 실제 기종의 한계가 아닙니다.</li>
         <li><b>좌석 폭</b> = 팔걸이 사이 쿠션 폭, 팔걸이는 인접 좌석이 공유합니다 (팔걸이 수 = 좌석 수 + 좌석 군 수).</li>
         <li><b>곡률 보정</b>: 바닥이 단면 중심 아래(반경의 16%, A320 도면에서 역산한 가정)에 있다고 보고, 팔걸이 높이(25 in = 0.635 m)에서의 객실 폭과 바닥 가장자리가 단면 안에 들어가는 최소 반경을 닫힌 형태로 계산합니다.</li>
@@ -370,11 +371,13 @@ const DEF = {
   noseK: 1.135, tailK: 2.5, overlapK: 1.09,
   fwdLen: 2.0, aftLen: 3.03, midLen: 2.0, bayLen: 1.2,
   lavPer: 50, exitAuto: false, exitIn: 2.5, wingPos: 0.38,
-  owX: 0, owGap: 0, aftFront: true, doorPlan: null, doorI: 'IP'
+  owX: 0, owGap: 0, aftFront: true, doorPlan: null, doorI: 'IP',
+  want: '',               // 마지막으로 정한(외경을 정한) 배열 — 안쪽이 줄어 배열이 축소돼도 되돌리면 복귀하고, 축소 안내를 계속 띄우는 기준
+  dLocked: false          // 좌석 주도에서 외경 고정: 단면 값(쉘·좌석·통로 등)을 바꿔도 바깥 라인은 그대로, 안쪽이 줄고 배열이 자동 조정됨
 };
 /* 요구 규칙의 원래 기본값 (A320 도면과 다른 항목만) — "원래 규칙 기본값 적용" 버튼용 */
 const RULE_DEF = { clrIn: 3.5, shellIn: 6, floorK: 0.10, noseK: 1.4, tailK: 2.5, overlapK: 1.4, aftLen: 2.5, aftFront: false,
-                   exitAuto: true, exitIn: 10, wingPos: 0.42, owX: 0, owGap: 1, seatIn: 18, armIn: 2, pitchIn: 31, lavPer: 50, doorPlan: null, doorI: 'I' };
+                   exitAuto: true, exitIn: 10, wingPos: 0.42, owX: 0, owGap: 1, seatIn: 18, armIn: 2, pitchIn: 31, lavPer: 50, doorPlan: null, doorI: 'I', dLocked: false };
 let P = Object.assign({}, DEF), activePreset = null, RES = null;
 
 /* 캔버스 색: CSS 변수는 캔버스에서 쓸 수 없어 팔레트를 따로 둔다. 라이트 모드는 글자를 모두 어두운 색으로 (밝은 회색·흰색 글자 없음) */
@@ -621,33 +624,53 @@ function cabin(rows, X, P, slack) {
 /* ---------------------------------------------------------------------
    3. 전체 해석 (좌석 주도 / 동체 주도)
    --------------------------------------------------------------------- */
+function pickFit(P) {
+  /* 고정된 외경 P.fuseD 안에 들어가는 배열 선택. 외경은 그대로이고 쉘·좌석·통로가 커지면 안쪽이 줄어 배열이 자동으로 작아진다(3-3 → 3-2 …).
+     자동 배열 켬: 들어가는 최대 배열. 끔: 지정한 배열(P.layout)을 상한으로, 안 들어가면 들어가는 가장 큰 배열. 가장 작은 배열도 안 들어가면 noFit */
+  const fits = LAYOUTS[P.body].map(ls => ({ ls, X: cross(parse(ls), P, P.fuseD) }));
+  const ok = fits.filter(f => f.X.fits), maxAb = a => a.reduce((m, f) => f.X.ab > m.X.ab ? f : m);
+  const pref = fits.find(f => f.ls === P.layout) || fits[0];
+  const want = fits.find(f => f.ls === P.want) || pref;             // 마지막으로 외경을 정한 배열 (축소 안내의 기준)
+  let pick;
+  if (P.autoLayout) pick = ok.length ? maxAb(ok) : fits[0];
+  else if (pref.X.fits) pick = pref;
+  else { const sm = ok.filter(f => f.X.ab < pref.X.ab); pick = sm.length ? maxAb(sm) : pref; }
+  const top = want.X.ab >= pref.X.ab ? want : pref;
+  return { fits, pick, shrunk: pick.X.fits && pick.X.ab < top.X.ab ? { from: top.ls, to: pick.ls } : null };
+}
 function solve(P) {
-  let X, layoutStr, rows, c, Do, slack = 0, Lf, fitInfo = null, noLen = false, noFit = false, targetPax = null;
-  if (P.mode === 'seat') {
+  let X, layoutStr, rows, c, Do, slack = 0, Lf, fitInfo = null, noLen = false, noFit = false, targetPax = null, shrunk = null;
+  const dFixed = P.mode === 'fuse' || (P.dLocked && P.fuseD > 0);        // 외경이 입력값으로 고정된 상태
+  if (!dFixed) {
     layoutStr = P.layout; X = cross(parse(layoutStr), P, null);
     rows = P.basis === 'pax' ? Math.max(1, Math.ceil(P.pax / X.ab)) : P.rows;
     targetPax = P.basis === 'pax' ? P.pax : null;
     c = cabin(rows, X, P, 0); Do = X.Do;
   } else {
-    const fits = LAYOUTS[P.body].map(ls => ({ ls, X: cross(parse(ls), P, P.fuseD) }));
-    fitInfo = fits.map(f => ({ ls: f.ls, req: f.X.DoReq, fit: f.X.fits, ab: f.X.ab }));
-    let pick;
-    if (P.autoLayout) { const ok = fits.filter(f => f.X.fits); pick = ok.length ? ok.reduce((m, f) => f.X.ab > m.X.ab ? f : m) : fits[0]; }
-    else pick = fits.find(f => f.ls === P.layout) || fits[0];
+    const pf = pickFit(P), pick = pf.pick; shrunk = pf.shrunk;
+    fitInfo = pf.fits.map(f => ({ ls: f.ls, req: f.X.DoReq, fit: f.X.fits, ab: f.X.ab }));
     X = pick.X; layoutStr = pick.ls; Do = P.fuseD; noFit = !X.fits;
-    const Ln0 = noseLen(P, Do), Lt0 = P.tailK * Do, ov0 = Math.min(P.overlapK * Do, Lt0);
-    const avail = P.fuseL - Ln0 - Lt0 + ov0;
-    let rMax = 0; const c00 = cabin(0, X, P, 0);
-    if (c00.L > avail) noLen = true;
-    else if (!noFit) { for (let r = 1; r <= 200; r++) { if (cabin(r, X, P, 0).L > avail) break; rMax = r; } }
-    rows = 0; slack = 0;
-    if (!noFit && !noLen) {                              // 남는 길이를 넣고도 출구 규정을 만족하는 최대 행 수
-      for (let r = rMax; r >= 0; r--) {
-        const sl = avail - cabin(r, X, P, 0).L, t = cabin(r, X, P, sl);
-        if (t.L <= avail + 1e-9 && t.gapOK) { rows = r; slack = sl; break; }
+    if (P.mode === 'seat') {                             // 좌석 주도 + 외경 고정: 승객 수·행 수로 길이 결정, 외경은 그대로
+      rows = noFit ? 0 : P.basis === 'pax' ? Math.max(1, Math.ceil(P.pax / X.ab)) : P.rows;
+      targetPax = P.basis === 'pax' ? P.pax : null;
+      c = cabin(rows, X, P, 0);
+    } else {
+      const Ln0 = noseLen(P, Do), Lt0 = P.tailK * Do, ov0 = Math.min(P.overlapK * Do, Lt0);
+      const avail = P.fuseL - Ln0 - Lt0 + ov0;
+      let rMax = 0; const c00 = cabin(0, X, P, 0);
+      if (c00.L > avail) noLen = true;
+      else if (!noFit) { for (let r = 1; r <= 200; r++) { if (cabin(r, X, P, 0).L > avail) break; rMax = r; } }
+      rows = 0; slack = 0;
+      if (!noFit && !noLen) {                              // 남는 길이를 넣고도 출구 규정을 만족하는 최대 행 수
+        for (let r = rMax; r >= 0; r--) {
+          let sl = avail - cabin(r, X, P, 0).L, t = cabin(r, X, P, sl);
+          /* 남는 길이를 넣으면 출구 간격 때문에 출구가 더 붙어 길이가 늘 수 있다 → 늘어난 만큼 남는 길이를 줄여 다시 맞춤 (안 그러면 승객 0 으로 떨어지는 구간이 생김) */
+          for (let it = 0; it < 4 && t.L > avail + 1e-9 && sl > 0.01; it++) { sl = Math.max(0, sl - (t.L - avail)); t = cabin(r, X, P, sl); }
+          if (t.L <= avail + 1e-9 && t.gapOK) { rows = r; slack = sl; break; }
+        }
       }
+      c = cabin(rows, X, P, slack); Lf = P.fuseL;
     }
-    c = cabin(rows, X, P, slack); Lf = P.fuseL;
   }
   const Ln = noseLen(P, Do), Lt = P.tailK * Do, ov = Math.min(P.overlapK * Do, Lt, c.L);
   if (Lf == null) Lf = Ln + c.L + Lt - ov;
@@ -658,7 +681,7 @@ function solve(P) {
   const Ro = Do / 2;
   const tO = clamp(ov / Lt, 0.02, 0.98), r = (X.W / 2 + X.shell + 0.02) / Ro;
   const pTail = clamp(Math.log(Math.max(1 - r, 0.005) / 0.92) / Math.log(tO), 1.6, 12);
-  const R = { P: Object.assign({}, P), layoutStr, X, rows, pax: rows * X.ab, targetPax, c, Do, Ln, Lt, ov, Lf, Ro, slack, ratio: Lf / Do, fitInfo, noLen, noFit, pTail, hintSeat };
+  const R = { P: Object.assign({}, P), layoutStr, X, rows, pax: rows * X.ab, targetPax, c, Do, Ln, Lt, ov, Lf, Ro, slack, ratio: Lf / Do, fitInfo, noLen, noFit, pTail, hintSeat, dFixed, shrunk };
   R.checks = evaluate(R);
   return R;
 }
@@ -670,16 +693,19 @@ function solve(P) {
    - 승객 수의 한계는 고정값이 아니라 (배열 · 피치 · 좌석 폭 · 전장 슬라이더 상한)에서 계산한다 (layoutCap).
    - 승객 수가 현재 배열의 한계를 넘으면 CHAIN 순서로 더 큰 배열·광동체로 자동 전환하고(P.base 에 원래 구성 저장), 줄이면 복귀한다.
    --------------------------------------------------------------------- */
-const NONDRV = Object.keys(DEF).filter(k => !['mode', 'basis', 'pax', 'rows', 'fuseL', 'fuseD', 'autoLayout', 'body', 'layout'].includes(k));
+const NONDRV = Object.keys(DEF).filter(k => !['mode', 'basis', 'pax', 'rows', 'fuseL', 'fuseD', 'autoLayout', 'body', 'layout', 'dLocked', 'want'].includes(k));
 const capMemo = new Map();
 const bodyOf = ls => LAYOUTS.narrow.includes(ls) ? 'narrow' : 'wide';
-function layoutCap(Q, ls) {
-  /* ls 배열이 전장 슬라이더 범위 [L0, L1] 안에서 배치할 수 있는 행 수·승객 수 범위. 외경은 그 배열의 필요 외경으로 둔다. */
+function layoutCap(Q, ls, Dfix) {
+  /* ls 배열이 전장 슬라이더 범위 [L0, L1] 안에서 배치할 수 있는 행 수·승객 수 범위. 외경은 그 배열의 필요 외경으로 두고, Dfix 가 주어지고 그 안에 들어가면 그 외경으로 계산한다. */
   const body = bodyOf(ls), rg = RANGE[body];
-  const key = ls + '|' + NONDRV.map(k => JSON.stringify(Q[k])).join('|');
+  let X = cross(parse(ls), Q, null);
+  if (Dfix != null && Dfix >= X.DoReq - 1e-9) X = cross(parse(ls), Q, Dfix);
+  const Do = X.Do;
+  const key = ls + '|' + Do.toFixed(4) + '|' + NONDRV.map(k => JSON.stringify(Q[k])).join('|');
   let c = capMemo.get(key); if (c) return c;
-  const X = cross(parse(ls), Q, null), Pc = Object.assign({}, Q, { mode: 'fuse', body, layout: ls, fuseD: X.DoReq });
-  const Ln = noseLen(Pc, X.DoReq), Lt = Q.tailK * X.DoReq, ov = Math.min(Q.overlapK * X.DoReq, Lt), pad = Ln + Lt - ov;
+  const Pc = Object.assign({}, Q, { mode: 'fuse', body, layout: ls, fuseD: Do });
+  const Ln = noseLen(Pc, Do), Lt = Q.tailK * Do, ov = Math.min(Q.overlapK * Do, Lt), pad = Ln + Lt - ov;
   const rowsAt = L => {
     const a = L - pad; if (cabin(0, X, Pc, 0).L > a) return 0;
     let r = 0; for (let i = 1; i <= 300; i++) { if (cabin(i, X, Pc, 0).L > a) break; r = i; } return r;
@@ -690,7 +716,7 @@ function layoutCap(Q, ls) {
   capMemo.set(key, c); if (capMemo.size > 600) capMemo.delete(capMemo.keys().next().value);
   return c;
 }
-const snap = () => ({ body: P.body, layout: P.layout, aisleIn: P.aisleIn, shellIn: P.shellIn, doorPlan: P.doorPlan, preset: activePreset });
+const snap = () => ({ body: P.body, layout: P.layout, aisleIn: P.aisleIn, shellIn: P.shellIn, doorPlan: P.doorPlan, fuseD: P.fuseD, dLocked: P.dLocked, want: P.want, preset: activePreset });
 const chainIdx = (body, ls) => CHAIN.findIndex(e => e.body === body && e.ls === ls);
 function chainCfg(e, b) {                                   // 사슬의 e 구성을 평가할 때의 파라미터: 같은 형식이면 원래 값, 다른 형식이면 그 형식의 기본 통로·쉘
   const same = e.body === b.body;
@@ -699,26 +725,32 @@ function chainCfg(e, b) {                                   // 사슬의 e 구�
 }
 function escalate() {
   /* 목표 승객 수를 수용하는 가장 작은 구성(원래 구성 이상)으로 맞춘다. 원래 구성에 들어가면 복귀한다. */
-  const b = P.base || snap(), i0 = chainIdx(b.body, b.layout);
+  const b = P.base || snap();
+  /* 외경이 고정이면 시작 구성은 그 외경에 실제로 들어가는 배열(쉘·좌석이 커져 줄어든 배열 포함) */
+  const cfgB = Object.assign({}, P, { body: b.body, layout: b.layout, aisleIn: b.aisleIn, shellIn: b.shellIn, doorPlan: b.doorPlan, fuseD: b.fuseD, dLocked: b.dLocked, mode: 'seat' });
+  const i0 = chainIdx(b.body, b.dLocked ? pickFit(cfgB).pick.ls : b.layout);
   if (i0 < 0) return;
   let k = i0;
-  while (k < CHAIN.length - 1 && layoutCap(chainCfg(CHAIN[k], b), CHAIN[k].ls).paxMax < P.pax) k++;
+  while (k < CHAIN.length - 1 && layoutCap(chainCfg(CHAIN[k], b), CHAIN[k].ls, k === i0 && b.dLocked ? b.fuseD : null).paxMax < P.pax) k++;
   const e = CHAIN[k];
   if (k === i0) {
-    if (P.base) { Object.assign(P, { body: b.body, layout: b.layout, aisleIn: b.aisleIn, shellIn: b.shellIn, doorPlan: b.doorPlan }); activePreset = b.preset; view.auto = true; }
+    if (P.base) { Object.assign(P, { body: b.body, layout: b.layout, aisleIn: b.aisleIn, shellIn: b.shellIn, doorPlan: b.doorPlan, fuseD: b.fuseD, dLocked: b.dLocked, want: b.want }); activePreset = b.preset; view.auto = true; }
     P.base = null;
   } else if (e.body !== P.body || e.ls !== P.layout || !P.base) {
     const cfg = chainCfg(e, b);
     if (!P.base) P.base = b;
-    Object.assign(P, { body: cfg.body, layout: cfg.layout, aisleIn: cfg.aisleIn, shellIn: cfg.shellIn, doorPlan: cfg.doorPlan });
+    Object.assign(P, { body: cfg.body, layout: cfg.layout, aisleIn: cfg.aisleIn, shellIn: cfg.shellIn, doorPlan: cfg.doorPlan, dLocked: false });   // 더 큰 배열·형식으로 바뀌면 외경도 그 구성에 맞게 다시 정함
     activePreset = null; view.auto = true;
   }
-  const cap = layoutCap(P, P.layout);
+  const cap = layoutCap(P, P.dLocked ? pickFit(P).pick.ls : P.layout, P.dLocked ? P.fuseD : null);
   P.pax = clamp(P.pax, cap.paxMin, Math.max(cap.paxMin, cap.paxMax));
 }
 function driveRanges() {
-  const b = P.base || snap(), i0 = Math.max(0, chainIdx(b.body, b.layout)), last = CHAIN[CHAIN.length - 1];
-  const eff = layoutCap(P, P.layout), baseCap = layoutCap(chainCfg(CHAIN[i0], b), CHAIN[i0].ls);
+  const b = P.base || snap(), last = CHAIN[CHAIN.length - 1];
+  const Dh = P.mode === 'fuse' || P.dLocked ? P.fuseD : null, effLs = Dh != null ? pickFit(P).pick.ls : P.layout;
+  const cfgB = Object.assign({}, P, { body: b.body, layout: b.layout, aisleIn: b.aisleIn, shellIn: b.shellIn, doorPlan: b.doorPlan, fuseD: b.fuseD, dLocked: b.dLocked, mode: 'seat' });
+  const i0 = Math.max(0, chainIdx(b.body, b.dLocked ? pickFit(cfgB).pick.ls : b.layout));
+  const eff = layoutCap(P, effLs, Dh), baseCap = layoutCap(chainCfg(CHAIN[i0], b), CHAIN[i0].ls, b.dLocked ? b.fuseD : null);
   const gmax = Math.max(layoutCap(chainCfg(last, b), last.ls).paxMax, eff.paxMax);
   const caps = LAYOUTS[P.body].map(ls => layoutCap(P, ls).X.DoReq);
   const up = v => Math.ceil(v * 100 - 1e-9) / 100;
@@ -729,14 +761,15 @@ const DRV = { pax: { mode: 'seat', basis: 'pax' }, rows: { mode: 'seat', basis: 
 function setDriver(k, v) {
   /* k 를 기준으로 삼고 값을 v 로 설정(범위로 제한). 승객 수는 필요하면 배열·형식을 자동 전환한다. */
   const rg = driveRanges()[k];
+  if (P.mode === 'fuse' && DRV[k].mode === 'seat') P.dLocked = true;        // 직접 정한 외경은 승객 수·행 수를 바꿔도 유지
   Object.assign(P, DRV[k]); P[k] = clamp(v, rg[0], rg[1]);
   if (k === 'pax') escalate(); else P.base = null;       // 행·전장·외경을 직접 정하면 현재 구성을 확정
 }
 function linkBack(R) {
   /* 해석 결과를 입력 상태에 되돌려 써서 네 슬라이더가 항상 같은 구성을 가리키게 한다 */
   if (R.noFit || R.noLen) return;
-  if (P.mode === 'seat') { P.fuseL = R.Lf; P.fuseD = R.Do; if (P.basis === 'pax') P.rows = R.rows; else P.pax = R.pax; }
-  else { P.pax = R.pax; P.rows = R.rows; P.layout = R.layoutStr; }
+  if (P.mode === 'seat') { P.fuseL = R.Lf; P.fuseD = R.Do; if (P.basis === 'pax') P.rows = R.rows; else P.pax = R.pax; if (R.dFixed && P.autoLayout) P.layout = R.layoutStr; if (!R.dFixed) P.want = R.layoutStr; }
+  else { P.pax = R.pax; P.rows = R.rows; if (P.autoLayout) P.layout = R.layoutStr; }
 }
 
 /* ---------------------------------------------------------------------
@@ -747,9 +780,13 @@ function evaluate(R) {
   const add = (st, title, detail, ref) => out.push({ st, title, detail, ref });
   const aisIn = P.aisleIn;
   add(aisIn >= 20 - 1e-9 ? 'ok' : aisIn >= 15 ? 'warn' : 'bad', '통로 폭', `${aisIn.toFixed(1)} in(팔걸이 사이 폭) — 20석 이상: 바닥 25 in 이상 높이에서 ≥ 20 in, 25 in 미만에서 ≥ 15 in${aisIn < 20 && aisIn >= 15 ? '. 20 in 미만이라 25 in 이상 높이(좌석 등받이·어깨)에서 20 in 이상인지 별도 확인이 필요합니다 — Airbus 단면 도면은 A320 19 in(와이더 시트) · A330 18/19 in · A350 18.1 in' : ''}`, '14 CFR 25.815');
-  if (P.mode === 'fuse') {
-    add(R.noFit ? 'bad' : 'ok', '단면 적합', R.noFit ? `${R.layoutStr} 필요 외경 ${R.X.DoReq.toFixed(2)} m > 입력 ${P.fuseD.toFixed(2)} m` + (R.hintSeat != null ? ` (좌석 폭 ${R.hintSeat.toFixed(1)} in 이하면 적합)` : '') : `${R.layoutStr} 필요 외경 ${X.DoReq.toFixed(2)} m ≤ 입력 ${P.fuseD.toFixed(2)} m (여유 ${(P.fuseD - X.DoReq).toFixed(2)} m)`, '단면 기하');
-    add(R.noLen ? 'bad' : 'ok', '길이 적합', R.noLen ? '전장이 기수·꼬리·최소 서비스 모듈에도 부족합니다' : `${R.rows}행 배치, 미사용 길이 ${R.slack.toFixed(2)} m${R.c.spread ? ' (출구 간격 규정 때문에 행 간격에 분산)' : ''}`, '종방향 구성');
+  if (R.dFixed) {
+    const req = ls => (R.fitInfo.find(f => f.ls === ls) || {}).req;
+    add(R.noFit ? 'bad' : R.shrunk ? 'warn' : 'ok', '단면 적합',
+      R.noFit ? `${R.layoutStr} 필요 외경 ${R.X.DoReq.toFixed(2)} m > 입력 ${P.fuseD.toFixed(2)} m` + (R.hintSeat != null ? ` (좌석 폭 ${R.hintSeat.toFixed(1)} in 이하면 적합)` : '')
+      : R.shrunk ? `외경 ${P.fuseD.toFixed(2)} m 고정 · 쉘 ${P.shellIn.toFixed(1)} in → 내경 ${X.Di.toFixed(2)} m. ${R.shrunk.from} 은(는) 필요 외경 ${req(R.shrunk.from).toFixed(2)} m 라 안 들어가 ${R.shrunk.to}(으)로 자동 축소 (여유 ${(P.fuseD - X.DoReq).toFixed(2)} m)`
+      : `${R.layoutStr} 필요 외경 ${X.DoReq.toFixed(2)} m ≤ 외경 ${P.fuseD.toFixed(2)} m (여유 ${(P.fuseD - X.DoReq).toFixed(2)} m)`, '단면 기하');
+    if (P.mode === 'fuse') add(R.noLen ? 'bad' : 'ok', '길이 적합', R.noLen ? '전장이 기수·꼬리·최소 서비스 모듈에도 부족합니다' : `${R.rows}행 배치, 미사용 길이 ${R.slack.toFixed(2)} m${R.c.spread ? ' (출구 간격 규정 때문에 행 간격에 분산)' : ''}`, '종방향 구성');
   }
   const side = t => c.exits.filter(e => e.type === t).length;
   const nI = c.exits.filter(e => e.type !== 'III').length, nAll = c.exits.length;       // Type I 이상(A·A+·B·I)
@@ -811,6 +848,7 @@ const SLIDERS = {
   ]
 };
 const ctlMap = {};
+const XSEC = new Set(['seatIn', 'armIn', 'aisleIn', 'clrIn', 'shellIn', 'floorK', 'aspect']);   // 객실 단면에 영향을 주는 값
 function mkSliders(host, list) {
   list.forEach(sp => {
     const d = document.createElement('div'); d.className = 'ctl';
@@ -826,7 +864,10 @@ function mkSliders(host, list) {
       num.step = sp.step;
       inp.addEventListener('input', () => { setDriver(sp.k, +inp.value); update(); });
       num.addEventListener('change', () => { if (num.value !== '' && isFinite(+num.value)) setDriver(sp.k, +num.value); update(); });
-    } else inp.addEventListener('input', () => { P[sp.k] = +inp.value; if (sp.k === 'aisleIn' || sp.k === 'shellIn') P.base = null; update(); });
+    } else inp.addEventListener('input', () => {
+      if (XSEC.has(sp.k) && P.mode === 'seat') P.dLocked = true;       // 단면 값을 바꾸면 바깥 라인(외경)은 그대로 두고 안쪽이 변함
+      P[sp.k] = +inp.value; if (sp.k === 'aisleIn' || sp.k === 'shellIn') P.base = null; update();
+    });
     ctlMap[sp.k] = { sp, inp, out, num, box: d, badge: d.querySelector('.badge'), rng: d.querySelector('.rng') };
   });
 }
@@ -839,7 +880,8 @@ function syncControls() {
       const r = rgs[k], v = P[k];
       c.inp.min = r[0]; c.inp.max = r[1]; c.num.min = r[0]; c.num.max = r[1];
       c.inp.value = v; c.num.value = v.toFixed(c.sp.dec);
-      c.badge.textContent = isIn(k) ? '기준' : '자동'; c.badge.className = 'badge' + (isIn(k) ? ' in' : '');
+      const fixedD = k === 'fuseD' && P.mode === 'seat' && R.dFixed;
+      c.badge.textContent = isIn(k) ? '기준' : fixedD ? '고정' : '자동'; c.badge.className = 'badge' + (isIn(k) || fixedD ? ' in' : '');
     } else { c.inp.value = P[k]; c.out.textContent = c.sp.fmt(P[k]); }
     if (c.sp.show) c.box.style.display = c.sp.show() ? '' : 'none';
   });
@@ -847,7 +889,7 @@ function syncControls() {
   ctlMap.pax.rng.textContent = `${P.layout} ${e.paxMin}–${e.paxMax}석 (전장 ${e.Lmin.toFixed(1)}–${e.Lmax} m)` + (nxt ? ` · 초과하면 더 큰 배열로 자동 전환, 전체 최대 ${rgs.gmax}석` : ' · 이 형식의 최대 배열');
   ctlMap.rows.rng.textContent = `${P.layout} ${e.rMin}–${e.rMax}행 (가로 ${e.ab}석)`;
   ctlMap.fuseL.rng.textContent = `범위 ${e.Lmin.toFixed(1)}–${e.Lmax} m` + (R.noFit || R.noLen ? '' : ` · 이 전장·외경 최대 ${R.pax}석 (${R.rows}행)`);
-  ctlMap.fuseD.rng.textContent = `${R.layoutStr} 필요 외경 ${f2(R.X.DoReq)} m` + (P.mode === 'fuse' ? '' : ' (배열에서 계산)');
+  ctlMap.fuseD.rng.textContent = `${R.layoutStr} 필요 외경 ${f2(R.X.DoReq)} m` + (R.dFixed ? ` · 내경 ${f2(R.X.Di)} m` + (P.mode === 'seat' ? ' · 단면 값을 바꿔도 외경 고정' : '') : ' (배열에서 계산)');
   ctlMap.exitIn.inp.disabled = P.exitAuto;
   $('#exitAuto').checked = P.exitAuto; $('#autoLayout').checked = P.autoLayout; $('#aftFront').checked = P.aftFront;
   const pl = planOf(P); $('#planInfo').style.display = pl ? '' : 'none';
@@ -861,7 +903,7 @@ function fillLayoutSel() {
     const g = document.createElement('optgroup'); g.label = body === 'narrow' ? '협동체 (통로 1개)' : '광동체 (통로 2개)';
     const cfg = body === P.body ? P : Object.assign({}, P, { aisleIn: BODY_DEF[body].aisle, shellIn: BODY_DEF[body].shell });
     LAYOUTS[body].forEach(l => {
-      const xr = cross(parse(l), cfg, null), fuseHere = P.mode === 'fuse' && body === P.body;
+      const xr = cross(parse(l), cfg, null), fuseHere = RES.dFixed && body === P.body;
       g.appendChild(new Option(`${l} · ${sum(parse(l))}열 · 외경 ${f2(xr.DoReq)} m${fuseHere ? (xr.DoReq <= P.fuseD + 1e-9 ? ' ✓' : ' ✗') : ''}`, `${body}|${l}`));
     });
     sel.appendChild(g);
@@ -871,16 +913,19 @@ function fillLayoutSel() {
 function pickLayout(body, ls) {
   /* 배열을 직접 고르면 현재 기준 유지: 좌석 주도면 승객 수를 이 배열의 범위로 제한, 동체 주도면 배열 고정. 형식이 바뀌면 형식 기본값 적용 */
   if (body !== P.body) setBody(body);
-  P.base = null; P.layout = ls; activePreset = null; view.auto = true;
+  P.base = null; P.layout = ls; P.want = ls; activePreset = null; view.auto = true;
   if (P.mode === 'fuse') P.autoLayout = false;
-  else { const cap = layoutCap(P, ls); P.pax = clamp(P.pax, cap.paxMin, Math.max(cap.paxMin, cap.paxMax)); }
+  else {
+    P.dLocked = false;                                   // 배열을 새로 고르면 그 배열에 맞는 외경으로 다시 정함
+    const cap = layoutCap(P, ls); P.pax = clamp(P.pax, cap.paxMin, Math.max(cap.paxMin, cap.paxMax));
+  }
 }
 
 function setBody(b) {
   /* 형식을 직접 바꾸면 승객 수는 유지하되 새 형식이 수용하는 범위로 제한 */
   const pax = P.pax;
   if (activePreset) CAL_KEYS.forEach(k => { P[k] = DEF[k]; });   // 프리셋의 보정값은 다른 형식에 맞지 않으므로 기본값으로
-  Object.assign(P, { mode: 'seat', basis: 'pax', base: null, body: b, layout: DEF_LAYOUT[b], aisleIn: BODY_DEF[b].aisle, shellIn: BODY_DEF[b].shell, doorPlan: null });
+  Object.assign(P, { mode: 'seat', basis: 'pax', base: null, dLocked: false, want: '', body: b, layout: DEF_LAYOUT[b], aisleIn: BODY_DEF[b].aisle, shellIn: BODY_DEF[b].shell, doorPlan: null });
   const cap = layoutCap(P, P.layout); P.pax = clamp(pax, cap.paxMin, cap.paxMax);
   activePreset = null; view.auto = true;
 }
@@ -1400,12 +1445,20 @@ function updatePanels() {
     }
   }
   else if (R.noLen) { bn.className = 'banner on'; bn.textContent = '입력 전장이 기수·꼬리·최소 서비스 모듈에도 부족합니다. 전장을 늘리세요.'; }
+  else if (R.shrunk) {
+    bn.className = 'banner on info';
+    bn.textContent = `외경 ${f2(P.fuseD)} m 는 고정이고 쉘·좌석·통로가 안쪽 공간(내경 ${f2(X.Di)} m)을 줄여 ${R.shrunk.from} 이(가) 들어가지 않습니다 → ${R.shrunk.to} 로 자동 축소했습니다. 값을 되돌리면 다시 늘어납니다.`;
+  }
+  else if (P.mode === 'seat' && P.dLocked && R.Lf > RANGE[P.body].L[1] + 1e-6) {
+    bn.className = 'banner on info';
+    bn.textContent = `전장 ${f2(R.Lf)} m 가 슬라이더 상한 ${RANGE[P.body].L[1]} m 를 넘었습니다. 외경 ${f2(P.fuseD)} m 를 고정하고 있어 더 큰 배열·형식으로 바꾸지 않았습니다. 승객 수나 피치를 줄이거나, 승객 수를 직접 입력하면 맞는 구성으로 전환합니다.`;
+  }
   else if (P.base || (P.mode === 'seat' && P.basis === 'pax' && P.pax >= driveRanges().gmax)) {
     if (!P.base) { bn.className = 'banner on info'; bn.textContent = `승객 수가 이 설정에서 배치할 수 있는 최대 ${P.pax}석(${P.layout}, 전장 ${driveRanges().eff.Lmax} m, 피치 ${f2(P.pitchIn, 1)} in)에 도달했습니다. 피치·좌석 폭을 줄이면 더 늘릴 수 있습니다.`; }
     else {
     const bc = layoutCap(chainCfg(CHAIN[chainIdx(P.base.body, P.base.layout)], P.base), P.base.layout), nm = b => b === 'wide' ? '광동체' : '협동체';
     bn.className = 'banner on info';
-    bn.textContent = `목표 ${P.pax}명이 ${nm(P.base.body)} ${P.base.layout} 의 최대 ${bc.paxMax}석(전장 ${bc.Lmax} m, 피치 ${f2(P.pitchIn, 1)} in)을 넘어 ${nm(P.body)} ${P.layout} 로 자동 전환했습니다. 승객 수를 줄이면 원래 구성으로 돌아갑니다.`;
+    bn.textContent = `목표 ${P.pax}명이 ${nm(P.base.body)} ${P.base.layout} 의 최대 ${bc.paxMax}석(전장 ${bc.Lmax} m, 피치 ${f2(P.pitchIn, 1)} in)을 넘어 ${nm(P.body)} ${P.layout} 로 자동 전환했습니다${P.base.fuseD && Math.abs(P.base.fuseD - P.fuseD) > 0.005 ? ` (외경 ${f2(P.base.fuseD)} → ${f2(P.fuseD)} m)` : ''}. 승객 수를 줄이면 원래 구성으로 돌아갑니다.`;
     }
   }
   else if (c.upgraded) { bn.className = 'banner on info'; bn.textContent = '출구 간격이 60 ft(18.29 m)를 넘어 오버윙/중앙 출구를 자동 보강했습니다.'; }
@@ -1457,7 +1510,7 @@ function updateCompare() {
   const rc = $('#recal'); if (rc) rc.onclick = e => {
     e.preventDefault();
     if (activePreset) applyPreset(activePreset);
-    else { const keep = { mode: P.mode, basis: P.basis, pax: P.pax, rows: P.rows, fuseL: P.fuseL, fuseD: P.fuseD, body: P.body, layout: P.layout }; CAL_KEYS.forEach(k => { P[k] = DEF[k]; }); Object.assign(P, ps.cal || {}, keep); }
+    else { const keep = { mode: P.mode, basis: P.basis, pax: P.pax, rows: P.rows, fuseL: P.fuseL, fuseD: P.fuseD, body: P.body, layout: P.layout }; CAL_KEYS.forEach(k => { P[k] = DEF[k]; }); Object.assign(P, ps.cal || {}, keep, { dLocked: false }); }
     update();
   };
 }
@@ -1466,7 +1519,7 @@ function updateCompare() {
    9. 갱신 루프
    --------------------------------------------------------------------- */
 function update() {
-  if (P.mode === 'seat' && P.basis === 'pax') escalate();   // 피치·좌석 폭 등을 바꿔도 목표 승객 수를 수용하도록 배열·형식 유지
+  if (P.mode === 'seat' && P.basis === 'pax' && !P.dLocked) escalate();   // 피치 등을 바꿔도 목표 승객 수를 수용하도록 배열·형식 유지. 외경 고정 중에는 자동 전환(외경 변경)을 하지 않음
   RES = solve(P);
   linkBack(RES);
   trackWork();
@@ -1576,6 +1629,24 @@ function selfTest() {
   t(P.layout === '3-2' && rD.layoutStr === '3-2' && rD.pax > 0, '외경 3.6 m 입력 → 배열 3-2 자동 선택');
   P = Object.assign({}, DEF); activePreset = null;
   for (const pitch of [28, 31, 34]) { P.pitchIn = pitch; t(layoutCap(P, '3-3').paxMax === [336, 306, 276].at([28, 31, 34].indexOf(pitch)) || layoutCap(P, '3-3').paxMax > 0, '피치별 최대 승객 계산'); }
+  /* 외경 고정: 쉘·좌석 값이 커지면 바깥 라인은 그대로 두고 안쪽이 줄어 배열이 자동 축소(3-3 → 3-2), 되돌리면 복귀. 고정 해제 상태에서는 예전처럼 외경이 변함 */
+  P = Object.assign({}, DEF); activePreset = null;
+  const e0 = solve(P), D0 = e0.Do;
+  P.shellIn = 5.3; const eFree = solve(P);
+  t(eFree.Do > D0 + 0.005 && eFree.layoutStr === '3-3', '외경 고정 해제: 쉘이 두꺼워지면 외경이 커짐(' + eFree.Do.toFixed(3) + ' m)');
+  P = Object.assign({}, DEF); P.dLocked = true; P.fuseD = D0; P.shellIn = 5.3;
+  const eS = solve(P); linkBack(eS);
+  t(Math.abs(eS.Do - D0) < 1e-9 && Math.abs(eS.Ro * 2 - D0) < 1e-9, '외경 고정: 쉘 4.9 → 5.3 in 에도 외경 ' + D0.toFixed(3) + ' m 그대로');
+  t(eS.X.Di < e0.X.Di - 1e-9 && eS.layoutStr === '3-2' && !!eS.shrunk && !eS.noFit && eS.pax >= P.pax, '쉘이 두꺼워지면 내경 감소 ' + e0.X.Di.toFixed(3) + ' → ' + eS.X.Di.toFixed(3) + ' m, 3-3 → ' + eS.layoutStr + ' 자동 축소');
+  P.shellIn = 4.9; const eB = solve(P);
+  t(eB.layoutStr === '3-3' && Math.abs(eB.Do - D0) < 1e-9 && !eB.shrunk, '값을 되돌리면 3-3 으로 복귀');
+  P.seatIn = 20; const eW = solve(P);
+  t(Math.abs(eW.Do - D0) < 1e-9 && eW.X.ab < 6, '좌석 폭 20 in(폭 증가)에도 외경 고정, 배열 ' + eW.layoutStr + ' 로 축소');
+  P.seatIn = 18; P.autoLayout = false; P.layout = '3-3'; P.shellIn = 5.3;
+  const eP = solve(P);
+  t(eP.layoutStr === '3-2' && !!eP.shrunk && P.layout === '3-3', '자동 배열 끔: 지정 배열(3-3)을 상한으로 두고 안 들어가면 축소, 지정값은 유지');
+  P = Object.assign({}, DEF); P.dLocked = true; P.fuseD = 2.9;
+  t(solve(P).noFit, '외경이 가장 작은 배열(2-2)보다도 작으면 단면 부적합 표시');
   P = keepP; activePreset = keepPs;
   console.log('자가 테스트 완료', { 기본값_전장: +r.Lf.toFixed(2), 기본값_외경: +r.Do.toFixed(3) });
 }
